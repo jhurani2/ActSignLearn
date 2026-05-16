@@ -296,9 +296,6 @@ export default function PracticeMode({ letter, onNext }) {
                 <div style={{ position: 'absolute', top: 14, left: 14, padding: '8px 12px', borderRadius: 999, background: 'rgba(15,23,36,0.72)', color: 'white', fontSize: 12, letterSpacing: '0.06em' }}>
                   live camera
                 </div>
-                <div style={{ position: 'absolute', bottom: '18px', fontSize: '14px', color: 'var(--primary)', letterSpacing: '0.08em', opacity: 0.95, background: 'rgba(255,255,255,0.72)', padding: '8px 12px', borderRadius: 999 }}>
-                  hand detected
-                </div>
               </>
             ) : (
               <>
@@ -338,11 +335,6 @@ export default function PracticeMode({ letter, onNext }) {
           <div style={{ marginTop: 14 }}>
             <div className="section-label" style={{ marginBottom: 8 }}>tip</div>
             <div className="hint-text">{ASL_HINTS[letter]}</div>
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            <div className="section-label" style={{ marginBottom: 8 }}>feedback</div>
-            <div className="hint-text" style={{ color: score >= 85 ? '#3a5c32' : '#4f5663' }}>{poseFeedback}</div>
           </div>
 
           <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
