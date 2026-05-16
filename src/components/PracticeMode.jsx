@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { Camera } from '@mediapipe/camera_utils';
+import { Hands } from '@mediapipe/hands';
+import { drawConnectors } from '@mediapipe/drawing_utils';
 import { ASL_HINTS } from '../data/aslData';
 
 export default function PracticeMode({ letter, onNext }) {
@@ -6,7 +9,9 @@ export default function PracticeMode({ letter, onNext }) {
   const [score, setScore] = useState(null);
   const [cameraError, setCameraError] = useState('');
   const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const cameraRef = useRef(null);
+  const handsRef = useRef(null);
 
   // TODO: replace with real MediaPipe + TF.js classifier
   const simulateFeedback = () => {
@@ -31,39 +36,124 @@ export default function PracticeMode({ letter, onNext }) {
 
   useEffect(() => {
     let cancelled = false;
+    const detectionFrame = { xMin: 0.14, xMax: 0.86, yMin: 0.12, yMax: 0.9 };
 
     const stopStream = () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
+      if (cameraRef.current) {
+        cameraRef.current.stop();
+        cameraRef.current = null;
+      }
+      if (handsRef.current) {
+        handsRef.current.close?.();
+        handsRef.current = null;
       }
       if (videoRef.current) {
         videoRef.current.srcObject = null;
+      }
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     };
 
     const startStream = async () => {
       try {
         setCameraError('');
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
+        const hands = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
         });
 
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.6,
+          minTrackingConfidence: 0.6,
+        });
+
+        hands.onResults((results) => {
+          const canvas = canvasRef.current;
+          const video = videoRef.current;
+          if (!canvas || !video) return;
+
+          if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth || 1280;
+          if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight || 720;
+
+          const ctx = canvas.getContext('2d');
+          ctx.save();
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          results.multiHandLandmarks?.forEach((landmarks, handIndex) => {
+            const centroid = landmarks.reduce(
+              (acc, point) => ({
+                x: acc.x + point.x / landmarks.length,
+                y: acc.y + point.y / landmarks.length,
+              }),
+              { x: 0, y: 0 }
+            );
+
+            const inFrame =
+              centroid.x >= detectionFrame.xMin &&
+              centroid.x <= detectionFrame.xMax &&
+              centroid.y >= detectionFrame.yMin &&
+              centroid.y <= detectionFrame.yMax;
+
+            if (!inFrame) return;
+
+            const points63 = landmarks.flatMap((point) => [point.x, point.y, point.z]);
+            console.log(`hand ${handIndex + 1} 63 landmark values`, points63);
+
+            drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
+              color: 'rgba(0, 0, 0, 0.45)',
+              lineWidth: 10,
+            });
+            drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
+              color: 'rgba(110, 255, 136, 1)',
+              lineWidth: 5,
+            });
+
+            landmarks.forEach((landmark) => {
+              const x = landmark.x * canvas.width;
+              const y = landmark.y * canvas.height;
+
+              ctx.beginPath();
+              ctx.arc(x, y, 9, 0, Math.PI * 2);
+              ctx.fillStyle = '#d9ff8f';
+              ctx.shadowColor = 'rgba(110, 255, 136, 1)';
+              ctx.shadowBlur = 16;
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+              ctx.lineWidth = 2.75;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+              ctx.stroke();
+            });
+          });
+
+          ctx.restore();
+        });
+
+        handsRef.current = hands;
+
+        if (!videoRef.current) {
+          throw new Error('Camera video element is not ready yet.');
         }
 
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
+        const camera = new Camera(videoRef.current, {
+          onFrame: async () => {
+            if (!cancelled && handsRef.current && videoRef.current) {
+              await handsRef.current.send({ image: videoRef.current });
+            }
+          },
+          width: 1280,
+          height: 720,
+        });
+
+        cameraRef.current = camera;
+        await camera.start();
       } catch (error) {
         stopStream();
         setCameraError(error?.message || 'Unable to start the camera.');
@@ -95,6 +185,13 @@ export default function PracticeMode({ letter, onNext }) {
                   autoPlay
                   muted
                   playsInline
+                  onLoadedMetadata={() => {
+                    const canvas = canvasRef.current;
+                    if (canvas && videoRef.current) {
+                      canvas.width = videoRef.current.videoWidth || 1280;
+                      canvas.height = videoRef.current.videoHeight || 720;
+                    }
+                  }}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -102,6 +199,27 @@ export default function PracticeMode({ letter, onNext }) {
                     borderRadius: '12px',
                     transform: 'scaleX(-1)',
                     background: '#000',
+                  }}
+                />
+                <canvas
+                  ref={canvasRef}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    transform: 'scaleX(-1)',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: '12% 14%',
+                    borderRadius: 20,
+                    border: '2px solid rgba(110, 255, 136, 0.9)',
+                    boxShadow: '0 0 0 9999px rgba(15, 23, 36, 0.12) inset, 0 0 24px rgba(110, 255, 136, 0.18)',
+                    pointerEvents: 'none',
                   }}
                 />
                 <div style={{ position: 'absolute', top: 14, left: 14, padding: '8px 12px', borderRadius: 999, background: 'rgba(15,23,36,0.72)', color: 'white', fontSize: 12, letterSpacing: '0.06em' }}>
