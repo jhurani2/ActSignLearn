@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ASL_HINTS } from '../data/aslData';
 
 export default function PracticeMode({ letter, onNext }) {
   const [camOn, setCamOn] = useState(false);
   const [score, setScore] = useState(null);
+  const [cameraError, setCameraError] = useState('');
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   // TODO: replace with real MediaPipe + TF.js classifier
   const simulateFeedback = () => {
@@ -26,19 +29,85 @@ export default function PracticeMode({ letter, onNext }) {
     ? 'almost — check your thumb position'
     : 'try adjusting your finger curl';
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const stopStream = () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+
+    const startStream = async () => {
+      try {
+        setCameraError('');
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+      } catch (error) {
+        stopStream();
+        setCameraError(error?.message || 'Unable to start the camera.');
+        setCamOn(false);
+      }
+    };
+
+    if (camOn) {
+      startStream();
+    } else {
+      stopStream();
+    }
+
+    return () => {
+      cancelled = true;
+      stopStream();
+    };
+  }, [camOn]);
+
   return (
     <div className="flash-wrap">
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="card" style={{ width: '100%', maxWidth: 920, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14 }}>
-          <div className="cam-box" style={{ width: '100%', height: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="card" style={{ width: '100%', maxWidth: 1040, height: '72vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+          <div className="cam-box" style={{ width: '100%', height: '100%', maxWidth: 'none', aspectRatio: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {camOn ? (
               <>
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(122,162,247,0.06) 0%, transparent 100%)' }} />
-                <svg viewBox="0 0 200 200" width="200" height="200" style={{ position: 'relative', zIndex: 1 }}>
-                  <line x1="100" y1="180" x2="100" y2="120" stroke="#0b8a5f" strokeWidth="2" opacity="0.8"/>
-                  <circle cx="100" cy="120" r="6" fill="#0b8a5f" opacity="0.6"/>
-                </svg>
-                <div style={{ position: 'absolute', bottom: '18px', fontSize: '14px', color: 'var(--primary)', letterSpacing: '0.08em', opacity: 0.95 }}>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    transform: 'scaleX(-1)',
+                    background: '#000',
+                  }}
+                />
+                <div style={{ position: 'absolute', top: 14, left: 14, padding: '8px 12px', borderRadius: 999, background: 'rgba(15,23,36,0.72)', color: 'white', fontSize: 12, letterSpacing: '0.06em' }}>
+                  live camera
+                </div>
+                <div style={{ position: 'absolute', bottom: '18px', fontSize: '14px', color: 'var(--primary)', letterSpacing: '0.08em', opacity: 0.95, background: 'rgba(255,255,255,0.72)', padding: '8px 12px', borderRadius: 999 }}>
                   hand detected
                 </div>
               </>
@@ -73,6 +142,7 @@ export default function PracticeMode({ letter, onNext }) {
           ) : (
             <div style={{ marginTop: 12 }}>
               <div className="hint-text">{camOn ? 'show your hand & press check sign' : 'start the camera to begin'}</div>
+              {cameraError ? <div className="hint-text" style={{ color: '#c0392b', marginTop: 8 }}>{cameraError}</div> : null}
             </div>
           )}
 
