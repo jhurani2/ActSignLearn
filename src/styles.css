@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root{
+  --bg: #fbfcfd;
+  --card: #ffffff;
+  --muted: #6b7280; /* accessible muted text */
+  --text: #0f1724;
+  --primary: #7aa2f7; /* pastel blue */
+  --accent: #f7c6c7;  /* pastel pink */
+  --success: #8bd3a8; /* pastel green */
+  --glass: rgba(15,23,36,0.04);
+  --radius: 14px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased}
+
+.app{min-height:100vh;display:flex;flex-direction:column}
+
+.header{display:flex;align-items:center;justify-content:center;padding:20px 28px;height:96px;position:relative}
+.logo{display:flex;flex-direction:column;position:absolute;left:28px;top:50%;transform:translateY(-50%)}
+.logo-name{font-weight:800;letter-spacing:-0.01em;font-size:20px}
+.logo-sub{font-size:13px;color:var(--muted)}
+
+.main{flex:1;display:flex;flex-direction:column;align-items:center;gap:20px;padding:28px;min-height:calc(100vh - 96px)}
+
+/* Letter & navigation */
+.letter-row{display:flex;align-items:center;gap:18px}
+.letter-display{font-weight:800;font-size:clamp(72px,20vw,160px);line-height:1;color:var(--text);user-select:none}
+.letter-counter{font-size:13px;color:var(--muted)}
+
+.nav-btn{width:44px;height:44px;border-radius:10px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px}
+.nav-btn:focus{outline:2px solid var(--primary);outline-offset:3px}
+
+/* Minimal pills for modes */
+.toggle-pill{display:flex;gap:8px;align-items:center;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.toggle-btn{padding:12px 18px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-weight:700;font-size:16px}
+.toggle-btn.active{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 6px 18px rgba(122,162,247,0.12)}
+.toggle-btn:focus{outline:2px solid rgba(122,162,247,0.28);outline-offset:2px}
+
+/* Card system */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--glass);box-shadow:0 6px 18px rgba(15,23,36,0.06)}
+
+/* Camera / model box */
+.cam-box{width:100%;max-width:380px;aspect-ratio:4/3;border-radius:12px;border:1px solid var(--glass);background:linear-gradient(180deg, rgba(15,23,36,0.02), transparent);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+/* Flashcard layout for learn */
+.flash-wrap{display:flex;gap:28px;width:100%;max-width:1200px;align-items:stretch;height:100%}
+.flash-left{flex:1;display:flex;align-items:center;justify-content:center}
+.flash-card{flex:1;min-width:360px;height:100%;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(120px,22vw,200px);background:linear-gradient(180deg, rgba(122,162,247,0.06), transparent);color:var(--text)}
+.model-slot{width:420px;min-width:320px;height:100%;border-radius:12px;border:1px dashed var(--glass);display:flex;align-items:center;justify-content:center;color:var(--muted);background:linear-gradient(180deg, rgba(15,23,36,0.02), transparent)}
+
+.steps{display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:10px;align-items:flex-start}
+.step .num{width:28px;height:28px;border-radius:8px;background:var(--glass);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+.hint-text{color:var(--muted);font-size:14px;line-height:1.6}
+
+.controls{display:flex;gap:12px;width:100%;max-width:1200px}
+.primary-btn{padding:10px 18px;border-radius:12px;border:none;background:var(--primary);color:white;cursor:pointer;font-weight:600}
+.ghost-btn{padding:10px 18px;border-radius:12px;border:1px solid var(--glass);background:transparent;color:var(--muted);cursor:pointer}
+
+/* Larger navigation buttons for flashcard controls */
+.nav-controls{display:flex;gap:14px;justify-content:center;margin-top:18px}
+.big-btn{padding:14px 24px;border-radius:14px;font-size:16px}
+
+/* Responsive */
+@media (max-width:880px){
+  .flash-wrap{flex-direction:column}
+  .flash-card{width:260px;height:260px;font-size:120px}
+  .model-slot{width:220px;height:220px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+}
