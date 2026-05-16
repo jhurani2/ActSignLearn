@@ -1,23 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera } from '@mediapipe/camera_utils';
-import { Hands } from '@mediapipe/hands';
+import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { drawConnectors } from '@mediapipe/drawing_utils';
 import { ASL_HINTS } from '../data/aslData';
+import referencePoses from '../data/referencePoses';
+import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
 
 export default function PracticeMode({ letter, onNext }) {
   const [camOn, setCamOn] = useState(false);
   const [score, setScore] = useState(null);
+  const [poseFeedback, setPoseFeedback] = useState('Start the camera to begin.');
   const [cameraError, setCameraError] = useState('');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraRef = useRef(null);
   const handsRef = useRef(null);
-
-  // TODO: replace with real MediaPipe + TF.js classifier
-  const simulateFeedback = () => {
-    const s = Math.floor(72 + Math.random() * 27);
-    setScore(s);
-  };
 
   const handleNext = () => {
     setScore(null);
@@ -31,8 +28,27 @@ export default function PracticeMode({ letter, onNext }) {
   const scoreMsg  = score >= 85
     ? 'great form! move to next letter'
     : score >= 70
-    ? 'almost — check your thumb position'
-    : 'try adjusting your finger curl';
+    ? 'almost — check the red joints'
+    : 'try adjusting the red joints';
+
+  const getFeedbackForJoint = (jointName) => {
+    if (jointName.includes('thumb')) {
+      return 'Curl your thumb inward a little more.';
+    }
+    if (jointName.includes('index')) {
+      return 'Straighten your index finger more.';
+    }
+    if (jointName.includes('middle')) {
+      return 'Raise or straighten your middle finger.';
+    }
+    if (jointName.includes('ring')) {
+      return 'Keep your ring finger straighter and relaxed.';
+    }
+    if (jointName.includes('pinky')) {
+      return 'Tuck your pinky a bit closer.';
+    }
+    return 'Keep your wrist steadier inside the frame.';
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -86,6 +102,9 @@ export default function PracticeMode({ letter, onNext }) {
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
 
+          const referenceVector = referencePoses[letter];
+          const inFrameComparisons = [];
+
           results.multiHandLandmarks?.forEach((landmarks, handIndex) => {
             const centroid = landmarks.reduce(
               (acc, point) => ({
@@ -103,26 +122,50 @@ export default function PracticeMode({ letter, onNext }) {
 
             if (!inFrame) return;
 
+            const comparison = referenceVector ? compareLandmarkVectors(landmarks, referenceVector) : null;
+            if (comparison) {
+              inFrameComparisons.push({
+                handIndex,
+                landmarks,
+                comparison,
+              });
+            }
+
             const points63 = landmarks.flatMap((point) => [point.x, point.y, point.z]);
             console.log(`hand ${handIndex + 1} 63 landmark values`, points63);
+            if (comparison) {
+              console.log(`hand ${handIndex + 1} normalized similarity`, comparison.similarity);
+            }
 
-            drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
-              color: 'rgba(0, 0, 0, 0.45)',
-              lineWidth: 10,
-            });
-            drawConnectors(ctx, landmarks, Hands.HAND_CONNECTIONS, {
-              color: 'rgba(110, 255, 136, 1)',
-              lineWidth: 5,
+            const landmarkColors = comparison
+              ? comparison.landmarkErrors.map((error) => (error > 0.16 ? '#ff5d5d' : '#b7ff72'))
+              : landmarks.map(() => '#b7ff72');
+
+            HAND_CONNECTIONS.forEach(([start, end]) => {
+              const startError = comparison ? comparison.landmarkErrors[start] : 0;
+              const endError = comparison ? comparison.landmarkErrors[end] : 0;
+              const isOff = startError > 0.16 || endError > 0.16;
+              const lineColor = isOff ? 'rgba(255, 93, 93, 1)' : 'rgba(110, 255, 136, 1)';
+
+              drawConnectors(ctx, [landmarks[start], landmarks[end]], [[0, 1]], {
+                color: 'rgba(0, 0, 0, 0.45)',
+                lineWidth: 10,
+              });
+              drawConnectors(ctx, [landmarks[start], landmarks[end]], [[0, 1]], {
+                color: lineColor,
+                lineWidth: 5,
+              });
             });
 
-            landmarks.forEach((landmark) => {
+            landmarks.forEach((landmark, index) => {
               const x = landmark.x * canvas.width;
               const y = landmark.y * canvas.height;
+              const dotColor = landmarkColors[index];
 
               ctx.beginPath();
               ctx.arc(x, y, 9, 0, Math.PI * 2);
-              ctx.fillStyle = '#d9ff8f';
-              ctx.shadowColor = 'rgba(110, 255, 136, 1)';
+              ctx.fillStyle = dotColor;
+              ctx.shadowColor = dotColor;
               ctx.shadowBlur = 16;
               ctx.fill();
 
@@ -131,7 +174,35 @@ export default function PracticeMode({ letter, onNext }) {
               ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
               ctx.stroke();
             });
+
           });
+
+          const bestMatch = inFrameComparisons
+            .filter((item) => item.comparison)
+            .sort((a, b) => b.comparison.similarity - a.comparison.similarity)[0];
+
+          if (bestMatch) {
+            const scorePercent = Math.round(Math.max(0, Math.min(1, bestMatch.comparison.similarity)) * 100);
+            setScore(scorePercent);
+
+            const worstJointIndex = bestMatch.comparison.landmarkErrors.reduce(
+              (worstIndex, currentError, index) => (
+                currentError > bestMatch.comparison.landmarkErrors[worstIndex] ? index : worstIndex
+              ),
+              0
+            );
+            const worstJointName = HAND_LANDMARK_NAMES[worstJointIndex] || 'wrist';
+            const worstError = bestMatch.comparison.landmarkErrors[worstJointIndex];
+
+            setPoseFeedback(
+              scorePercent >= 85
+                ? 'Great match. Keep it steady.'
+                : `${getFeedbackForJoint(worstJointName)} (${worstJointName}, ${worstError.toFixed(3)})`
+            );
+          } else if (camOn) {
+            setScore(null);
+            setPoseFeedback('Keep your hand inside the green frame.');
+          }
 
           ctx.restore();
         });
@@ -259,7 +330,7 @@ export default function PracticeMode({ letter, onNext }) {
             </div>
           ) : (
             <div style={{ marginTop: 12 }}>
-              <div className="hint-text">{camOn ? 'show your hand & press check sign' : 'start the camera to begin'}</div>
+              <div className="hint-text">{camOn ? 'show your hand & stay inside the frame' : 'start the camera to begin'}</div>
               {cameraError ? <div className="hint-text" style={{ color: '#c0392b', marginTop: 8 }}>{cameraError}</div> : null}
             </div>
           )}
@@ -269,9 +340,13 @@ export default function PracticeMode({ letter, onNext }) {
             <div className="hint-text">{ASL_HINTS[letter]}</div>
           </div>
 
+          <div style={{ marginTop: 14 }}>
+            <div className="section-label" style={{ marginBottom: 8 }}>feedback</div>
+            <div className="hint-text" style={{ color: score >= 85 ? '#3a5c32' : '#4f5663' }}>{poseFeedback}</div>
+          </div>
+
           <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
             <button className={camOn ? 'ghost-btn' : 'primary-btn'} onClick={() => { setCamOn(c => !c); setScore(null); }}>{camOn ? 'stop camera' : 'start camera'}</button>
-            {camOn && <button className="primary-btn" onClick={simulateFeedback}>check sign</button>}
           </div>
         </div>
       </div>
