@@ -1,8 +1,12 @@
-import { ASL_HINTS, getSteps } from '../data/aslData';
+import { getSteps } from '../data/aslData';
 import ModelViewer from './ModelViewer';
 
 export default function LearnMode({ letter, onPractice, onPrev, onNext }) {
   const steps = getSteps(letter);
+  const useRemoteIconScout = process.env.REACT_APP_USE_ICONSCOUT_REMOTE === 'true';
+  const remoteModelUrl = useRemoteIconScout
+    ? `/api/iconscout/letter/${encodeURIComponent(letter)}/download`
+    : null;
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
@@ -14,9 +18,7 @@ export default function LearnMode({ letter, onPractice, onPrev, onNext }) {
 
           <div style={{ width: 480, maxWidth: '48%', display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ModelViewer letter={letter}>
-                <div style={{ fontSize: 18, color: 'var(--muted)' }}>model placeholder</div>
-              </ModelViewer>
+              <ModelViewer letter={letter} modelUrl={remoteModelUrl} />
             </div>
 
             <div>
