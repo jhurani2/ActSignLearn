@@ -1,0 +1,140 @@
+{
+  "users": [
+    {
+      "id": "340dc899-c29c-4384-8053-b976206e6dbd",
+      "username": "oilmmdsdn",
+      "avatar": "otter",
+      "passwordHash": "0ce7ce4c02134ee3c053e2e769f1be855c647d684a44534acbbd4b0147219988cac053a6d242dd9b8413208ad20f08864d8115d41613bd07b0f8f7d2794f1dfd",
+      "passwordSalt": "dd974e137ebd6090098f269feb0bb79f",
+      "createdAt": "2026-05-17T00:10:40.066Z"
+    },
+    {
+      "id": "ef39fe2e-1e4f-479d-b68f-1f050fc81c7a",
+      "username": "ffdsfdffd",
+      "avatar": "ray",
+      "passwordHash": "c1d50efedb2e6ee7b35f452998f28e76372bdc0fb91861a0458a5bc500021b5876ac363619782aac3ef2b45a95c781a04e36ebe11b03265bb32961b4d8bb08a9",
+      "passwordSalt": "41a917675cb396bb0b18c4290e37e59e",
+      "createdAt": "2026-05-17T00:16:04.971Z"
+    },
+    {
+      "id": "9d0cec3a-9733-495a-8644-3d5c3ea13318",
+      "username": "dssdfdfdf",
+      "avatar": "otter",
+      "passwordHash": "214f98a5a03ab9d50bed0d53f8d8d42683cf3fbe62e0718d22400a246becb1ba30710aee2d5e7ab57cd4fdeaed97c50b973433954d5a3eb131f6975fb47e167a",
+      "passwordSalt": "fe02ecba2704eeb2aa23ae1e39bca11c",
+      "createdAt": "2026-05-17T02:01:56.296Z"
+    },
+    {
+      "id": "c876f913-1fa6-4729-9726-b62526eb98b6",
+      "username": "milo",
+      "avatar": "otter",
+      "passwordHash": "cfb94838c735bc9556c34ef2f6aa7606f66c3c79fb3043d4df1ad278613a7b386d999b976a0f2c886061f68929972c4073a486c1ce6422d71fa3600ed5a6d46e",
+      "passwordSalt": "a91edbf1c5777a07e756f8d11535b8b3",
+      "createdAt": "2026-05-17T02:56:54.144Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "5314cbcda224c3f63b67eb81d7c8a82487d85a9ed2d6978d0f99605fdfb18e6f",
+      "userId": "c876f913-1fa6-4729-9726-b62526eb98b6",
+      "createdAt": "2026-05-17T03:04:01.502Z",
+      "expiresAt": "2026-06-16T03:04:01.504Z",
+      "lastSeenAt": "2026-05-17T03:20:59.897Z"
+    }
+  ],
+  "progress": {
+    "340dc899-c29c-4384-8053-b976206e6dbd": {
+      "learnedLetters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "masteredLetters": [],
+      "practiceAttempts": 0,
+      "totalScore": 0,
+      "bestScores": {},
+      "recentPractice": [],
+      "lastActivityAt": "2026-05-17T00:11:50.869Z"
+    },
+    "ef39fe2e-1e4f-479d-b68f-1f050fc81c7a": {
+      "learnedLetters": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "masteredLetters": [],
+      "practiceAttempts": 0,
+      "totalScore": 0,
+      "bestScores": {},
+      "recentPractice": [],
+      "lastActivityAt": "2026-05-17T00:31:08.050Z"
+    },
+    "9d0cec3a-9733-495a-8644-3d5c3ea13318": {
+      "learnedLetters": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "O",
+        "P",
+        "R",
+        "S",
+        "T",
+        "U",
+        "X",
+        "Y",
+        "Z"
+      ],
+      "masteredLetters": [],
+      "practiceAttempts": 0,
+      "totalScore": 0,
+      "bestScores": {},
+      "practiceCounts": {},
+      "recentPractice": [],
+      "lastActivityAt": "2026-05-17T02:21:29.327Z"
+    },
+    "c876f913-1fa6-4729-9726-b62526eb98b6": {
+      "learnedLetters": [
+        "A"
+      ],
+      "masteredLetters": [
+        "A"
+      ],
+      "practiceAttempts": 1,
+      "totalScore": 99,
+      "bestScores": {
+        "A": 99
+      },
+      "practiceCounts": {
+        "A": 1
+      },
+      "masteryRecords": {
+        "A": {
+          "score": 99,
+          "masteredAt": "2026-05-17T02:57:52.737Z"
+        }
+      },
+      "recentPractice": [
+        {
+          "letter": "A",
+          "score": 99,
+          "passed": true,
+          "practiceCount": 1,
+          "mastered": true,
+          "at": "2026-05-17T02:57:52.737Z"
+        }
+      ],
+      "lastActivityAt": "2026-05-17T02:57:52.737Z"
+    }
+  }
+}

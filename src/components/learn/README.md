@@ -181,12 +181,12 @@ A: {
 
 ## Next: Integration with PracticeMode
 
-Your app already has a `Palmread.jsx` with mode switching (learn | practice).
+Your app already has an `ActSignLearnStudio.jsx` with mode switching (learn | practice).
 
 To integrate LearnPage:
 
 ```jsx
-// In Palmread.jsx
+// In ActSignLearnStudio.jsx
 import { LearnPage } from './components/learn/LearnPage';
 import PracticeMode from './components/PracticeMode';
 

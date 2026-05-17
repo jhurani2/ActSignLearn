@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 dotenv.config();
 
@@ -20,6 +23,8 @@ const API_KEY =
   process.env.ICONSCOUT_API_KEY ||
   process.env.REACT_APP_ICONSCOUT_API_KEY ||
   CLIENT_ID;
+const DB_FILE = path.join(__dirname, 'data', 'app-db.json');
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
 if (!CLIENT_ID) {
   console.warn('Warning: IconScout client ID is missing. Set ICONSCOUT_CLIENT_ID in .env');
@@ -38,6 +43,177 @@ if (!API_KEY) {
 }
 
 app.use(cors());
+app.use(express.json());
+
+ensureDatabase();
+
+app.post('/api/auth/signup', (req, res) => {
+  try {
+    const username = sanitizeUsername(req.body?.username);
+    const password = String(req.body?.password || '');
+    const avatar = sanitizeAvatar(req.body?.avatar);
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username must be 3-24 characters using letters, numbers, or underscores.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+
+    const db = readDatabase();
+    const existingUser = db.users.find((user) => user.username === username);
+    if (existingUser) {
+      return res.status(409).json({ error: 'That username is already taken.' });
+    }
+
+    const passwordSalt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = hashPassword(password, passwordSalt);
+    const newUser = {
+      id: crypto.randomUUID(),
+      username,
+      avatar,
+      passwordHash,
+      passwordSalt,
+      createdAt: new Date().toISOString(),
+    };
+
+    db.users.push(newUser);
+    db.progress[newUser.id] = defaultProgress();
+    const session = createSession(newUser.id);
+    db.sessions.push(session);
+    writeDatabase(db);
+
+    return res.status(201).json({
+      token: session.token,
+      user: toPublicUser(newUser),
+      progress: buildProgressSummary(db.progress[newUser.id]),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Unable to create account right now.' });
+  }
+});
+
+app.post('/api/auth/signin', (req, res) => {
+  try {
+    const username = sanitizeUsername(req.body?.username);
+    const password = String(req.body?.password || '');
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required.' });
+    }
+
+    const db = readDatabase();
+    const user = db.users.find((candidate) => candidate.username === username);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid username or password.' });
+    }
+
+    const incomingHash = hashPassword(password, user.passwordSalt);
+    if (incomingHash !== user.passwordHash) {
+      return res.status(401).json({ error: 'Invalid username or password.' });
+    }
+
+    purgeExpiredSessions(db);
+    const session = createSession(user.id);
+    db.sessions.push(session);
+    if (!db.progress[user.id]) {
+      db.progress[user.id] = defaultProgress();
+    }
+    writeDatabase(db);
+
+    return res.json({
+      token: session.token,
+      user: toPublicUser(user),
+      progress: buildProgressSummary(db.progress[user.id]),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Unable to sign in right now.' });
+  }
+});
+
+app.get('/api/auth/session', requireAuth, (req, res) => {
+  return res.json({ user: toPublicUser(req.user) });
+});
+
+app.post('/api/auth/logout', requireAuth, (req, res) => {
+  const db = req.db;
+  db.sessions = db.sessions.filter((session) => session.token !== req.session.token);
+  writeDatabase(db);
+  return res.json({ ok: true });
+});
+
+app.get('/api/progress/summary', requireAuth, (req, res) => {
+  const progress = req.db.progress[req.user.id] || defaultProgress();
+  if (!req.db.progress[req.user.id]) {
+    req.db.progress[req.user.id] = progress;
+    writeDatabase(req.db);
+  }
+  return res.json({ progress: buildProgressSummary(progress) });
+});
+
+app.post('/api/progress/learn', requireAuth, (req, res) => {
+  const letter = normalizeLetter(req.body?.letter);
+  if (!letter) {
+    return res.status(400).json({ error: 'Letter must be A-Z.' });
+  }
+
+  const progress = ensureUserProgress(req.db, req.user.id);
+  if (!progress.learnedLetters.includes(letter)) {
+    progress.learnedLetters.push(letter);
+  }
+  progress.lastActivityAt = new Date().toISOString();
+  writeDatabase(req.db);
+
+  return res.json({ progress: buildProgressSummary(progress) });
+});
+
+app.post('/api/progress/practice', requireAuth, (req, res) => {
+  const letter = normalizeLetter(req.body?.letter);
+  const numericScore = Number(req.body?.score);
+  const passed = Boolean(req.body?.passed);
+
+  if (!letter) {
+    return res.status(400).json({ error: 'Letter must be A-Z.' });
+  }
+  if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+    return res.status(400).json({ error: 'Score must be a number between 0 and 100.' });
+  }
+
+  const progress = ensureUserProgress(req.db, req.user.id);
+  const score = Math.round(numericScore);
+  if (!progress.learnedLetters.includes(letter)) {
+    progress.learnedLetters.push(letter);
+  }
+  progress.practiceAttempts += 1;
+  progress.totalScore += score;
+  progress.practiceCounts[letter] = Number(progress.practiceCounts[letter] || 0) + 1;
+  progress.bestScores[letter] = Math.max(progress.bestScores[letter] || 0, score);
+  if (score >= 99) {
+    progress.masteryRecords[letter] = {
+      score,
+      masteredAt: new Date().toISOString(),
+    };
+    if (!progress.masteredLetters.includes(letter)) {
+      progress.masteredLetters.push(letter);
+    }
+  }
+  progress.lastActivityAt = new Date().toISOString();
+  progress.recentPractice.unshift({
+    letter,
+    score,
+    passed: passed || score >= 99,
+    practiceCount: progress.practiceCounts[letter],
+    mastered: score >= 99,
+    at: progress.lastActivityAt,
+  });
+  progress.recentPractice = progress.recentPractice.slice(0, 24);
+  writeDatabase(req.db);
+
+  return res.json({ progress: buildProgressSummary(progress) });
+});
+
 app.get('/api/iconscout/letter/:letter/download', async (req, res) => {
   try {
     if (!CLIENT_ID && !API_KEY) {
@@ -839,6 +1015,220 @@ async function findIconForLetter(letter) {
   }
 
   return false;
+}
+
+function ensureDatabase() {
+  const directory = path.dirname(DB_FILE);
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
+  }
+
+  if (!fs.existsSync(DB_FILE)) {
+    writeDatabase({
+      users: [],
+      sessions: [],
+      progress: {},
+    });
+  }
+}
+
+function readDatabase() {
+  try {
+    const raw = fs.readFileSync(DB_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      users: Array.isArray(parsed.users) ? parsed.users : [],
+      sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
+      progress: parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {},
+    };
+  } catch {
+    return {
+      users: [],
+      sessions: [],
+      progress: {},
+    };
+  }
+}
+
+function writeDatabase(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+function defaultProgress() {
+  return {
+    learnedLetters: [],
+    masteredLetters: [],
+    practiceAttempts: 0,
+    totalScore: 0,
+    bestScores: {},
+    practiceCounts: {},
+    masteryRecords: {},
+    recentPractice: [],
+    lastActivityAt: new Date().toISOString(),
+  };
+}
+
+function ensureUserProgress(db, userId) {
+  if (!db.progress[userId]) {
+    db.progress[userId] = defaultProgress();
+  }
+  db.progress[userId] = normalizeProgress(db.progress[userId]);
+  return db.progress[userId];
+}
+
+function buildProgressSummary(progress) {
+  const safeProgress = normalizeProgress(progress || defaultProgress());
+  const attempts = Number(safeProgress.practiceAttempts || 0);
+  const totalScore = Number(safeProgress.totalScore || 0);
+  const averageScore = attempts ? Math.round(totalScore / attempts) : 0;
+
+  return {
+    learnedCount: safeProgress.learnedLetters.length,
+    learnedLetters: safeProgress.learnedLetters.slice(),
+    masteredCount: safeProgress.masteredLetters.length,
+    masteredLetters: safeProgress.masteredLetters.slice(),
+    totalAttempts: attempts,
+    averageScore,
+    bestScores: { ...(safeProgress.bestScores || {}) },
+    practiceCounts: { ...(safeProgress.practiceCounts || {}) },
+    masteryRecords: { ...(safeProgress.masteryRecords || {}) },
+    recentPractice: Array.isArray(safeProgress.recentPractice) ? safeProgress.recentPractice.slice(0, 10) : [],
+    lastActivityAt: safeProgress.lastActivityAt || null,
+  };
+}
+
+function normalizeProgress(progress) {
+  const base = defaultProgress();
+  const safe = {
+    ...base,
+    ...(progress && typeof progress === 'object' ? progress : {}),
+  };
+
+  safe.learnedLetters = uniqueLetters(safe.learnedLetters);
+  safe.practiceAttempts = Number(safe.practiceAttempts || 0);
+  safe.totalScore = Number(safe.totalScore || 0);
+  safe.bestScores = safe.bestScores && typeof safe.bestScores === 'object' ? safe.bestScores : {};
+  safe.practiceCounts = safe.practiceCounts && typeof safe.practiceCounts === 'object' ? safe.practiceCounts : {};
+  safe.masteryRecords = safe.masteryRecords && typeof safe.masteryRecords === 'object' ? safe.masteryRecords : {};
+  safe.recentPractice = Array.isArray(safe.recentPractice) ? safe.recentPractice : [];
+
+  Object.entries(safe.bestScores).forEach(([letter, score]) => {
+    const normalizedLetter = normalizeLetter(letter);
+    if (!normalizedLetter || Number(score) < 99) return;
+    if (!safe.masteryRecords[normalizedLetter]) {
+      safe.masteryRecords[normalizedLetter] = {
+        score: Number(score),
+        masteredAt: safe.lastActivityAt || new Date().toISOString(),
+      };
+    }
+  });
+
+  safe.masteredLetters = Object.keys(safe.masteryRecords)
+    .map((letter) => normalizeLetter(letter))
+    .filter(Boolean)
+    .sort();
+
+  return safe;
+}
+
+function uniqueLetters(value) {
+  return Array.from(new Set(
+    (Array.isArray(value) ? value : [])
+      .map((letter) => normalizeLetter(letter))
+      .filter(Boolean)
+  )).sort();
+}
+
+function sanitizeUsername(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!/^[a-z0-9_]{3,24}$/.test(normalized)) {
+    return '';
+  }
+  return normalized;
+}
+
+function sanitizeAvatar(value) {
+  const safe = String(value || '').trim().toLowerCase();
+  if (['otter', 'ray', 'octo'].includes(safe)) {
+    return safe;
+  }
+  return 'otter';
+}
+
+function toPublicUser(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar || 'otter',
+    createdAt: user.createdAt || null,
+  };
+}
+
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 120000, 64, 'sha512').toString('hex');
+}
+
+function createSession(userId) {
+  const timestamp = new Date().toISOString();
+  return {
+    token: crypto.randomBytes(32).toString('hex'),
+    userId,
+    createdAt: timestamp,
+    expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+    lastSeenAt: timestamp,
+  };
+}
+
+function parseAuthToken(req) {
+  const header = String(req.headers.authorization || '');
+  const [scheme, value] = header.split(' ');
+  if (scheme !== 'Bearer' || !value) {
+    return '';
+  }
+  return value.trim();
+}
+
+function purgeExpiredSessions(db) {
+  const now = Date.now();
+  const before = db.sessions.length;
+  db.sessions = db.sessions.filter((session) => Date.parse(session.expiresAt || '') > now);
+  return before !== db.sessions.length;
+}
+
+function requireAuth(req, res, next) {
+  const token = parseAuthToken(req);
+  if (!token) {
+    return res.status(401).json({ error: 'Missing session token.' });
+  }
+
+  const db = readDatabase();
+  const didPurge = purgeExpiredSessions(db);
+  const session = db.sessions.find((candidate) => candidate.token === token);
+  if (!session) {
+    if (didPurge) {
+      writeDatabase(db);
+    }
+    return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+  }
+
+  const user = db.users.find((candidate) => candidate.id === session.userId);
+  if (!user) {
+    db.sessions = db.sessions.filter((candidate) => candidate.token !== token);
+    writeDatabase(db);
+    return res.status(401).json({ error: 'Invalid session user.' });
+  }
+
+  session.lastSeenAt = new Date().toISOString();
+  req.db = db;
+  req.user = user;
+  req.session = session;
+  writeDatabase(db);
+  next();
+}
+
+function normalizeLetter(value) {
+  const letter = String(value || '').trim().toUpperCase();
+  return /^[A-Z]$/.test(letter) ? letter : '';
 }
 
 const server = app.listen(PORT, () => {

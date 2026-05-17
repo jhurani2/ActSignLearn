@@ -75,7 +75,7 @@ Refresh the browser. Done! ✨
 
 Your app has two modes: `learn` and `practice`. To wire them together:
 
-**Open `src/Palmread.jsx`** and change the LearnMode import:
+**Open `src/ActSignLearnStudio.jsx`** and change the LearnMode import:
 
 ```jsx
 // OLD:
@@ -115,7 +115,7 @@ Now the tab switcher (learn | practice) works with your new feature!
 ```
 src/
 ├── App.js                             ← Currently points to LearnPage
-├── Palmread.jsx                       ← Main app with mode switching
+├── ActSignLearnStudio.jsx             ← Main app with mode switching
 ├── components/
 │   ├── learn/
 │   │   ├── LearnPage.jsx              ← Main page (keyboard nav, preload)
