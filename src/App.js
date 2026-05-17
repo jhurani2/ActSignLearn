@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import LoginPage from './components/auth/LoginPage';
 import DashboardPage from './components/dashboard/DashboardPage';
+import LaunchSequence from './components/LaunchSequence';
 import UnderwaterBackground from './components/theme/UnderwaterBackground';
 import ActSignLearnStudio from './ActSignLearnStudio';
 import {
@@ -25,6 +26,7 @@ export default function App() {
   const [page, setPage] = useState('dashboard');
   const [progress, setProgress] = useState(null);
   const [activeDeck, setActiveDeck] = useState(null);
+  const [launchDone, setLaunchDone] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -125,8 +127,14 @@ export default function App() {
     setActiveDeck(null);
   };
 
+  const finishLaunch = useCallback(() => {
+    setLaunchDone(true);
+  }, []);
+
   let view;
-  if (authStatus === 'loading') {
+  if (!launchDone) {
+    view = <LaunchSequence onComplete={finishLaunch} />;
+  } else if (authStatus === 'loading') {
     view = <div className="center-loader">Loading ASL...</div>;
   } else if (authStatus !== 'authenticated') {
     view = <LoginPage onSubmit={authSubmit} loading={authLoading} />;

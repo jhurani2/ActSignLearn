@@ -35,10 +35,59 @@ function getDeckMetric(deck, progress, type) {
   return { value, total: items.length, label: `${value} mastered at 99%+` };
 }
 
+function isDeckComplete(deck, progress, type) {
+  const metric = getDeckMetric(deck, progress, type);
+  return metric.total > 0 && metric.value >= metric.total;
+}
+
+function canRenderDeck(deck) {
+  const items = deck.items || [];
+  const hasOnlyLetters = items.length > 0 && items.every((item) => /^[A-Z]$/.test(item));
+  return ['speed-sign', 'sign-duel'].includes(deck.gameMode) || ((deck.mode === 'learn' || deck.mode === 'practice') && hasOnlyLetters);
+}
+
+function applyProgressiveUnlocks(decks, progress, type) {
+  let previousDeckComplete = false;
+
+  return decks.map((deck) => {
+    const complete = isDeckComplete(deck, progress, type);
+    const unlocked = Boolean(deck.unlocked) || previousDeckComplete;
+    const nextDeck = {
+      ...deck,
+      complete,
+      renderable: canRenderDeck(deck),
+      unlocked,
+    };
+
+    previousDeckComplete = unlocked && complete;
+    return nextDeck;
+  });
+}
+
+function applyGameUnlocks(progress) {
+  const alphabetDeck = LEARN_DECKS[0];
+  const alphabetComplete = isDeckComplete(alphabetDeck, progress, 'learn');
+
+  return GAME_DECKS.map((deck) => ({
+    ...deck,
+    complete: isDeckComplete(deck, progress, 'games'),
+    renderable: canRenderDeck(deck),
+    unlocked: Boolean(deck.unlocked) || alphabetComplete,
+    unlockHint: 'Complete Alphabet lessons to unlock all games',
+  }));
+}
+
 function DeckCard({ deck, progress, type, onNavigate }) {
   const metric = getDeckMetric(deck, progress, type);
   const percent = metric.total ? Math.round((metric.value / metric.total) * 100) : 0;
-  const status = deck.unlocked ? 'Unlocked' : 'Locked';
+  const status = deck.complete ? 'Complete' : deck.unlocked ? 'Unlocked' : 'Locked';
+  const footLabel = !deck.unlocked
+    ? deck.unlockHint || 'Locked until the previous deck is complete'
+    : !deck.renderable
+    ? 'Unlocked - sign set coming soon'
+    : deck.complete
+    ? 'Complete - next set unlocked'
+    : metric.label;
 
   return (
     <button
@@ -47,7 +96,7 @@ function DeckCard({ deck, progress, type, onNavigate }) {
       style={{ '--deck-accent': deck.accent }}
       onClick={() => onNavigate(deck)}
       disabled={!deck.unlocked}
-      aria-label={`${deck.title}. ${status}. ${metric.label}.`}
+      aria-label={`${deck.title}. ${status}. ${footLabel}.`}
     >
       <span className="deck-art" aria-hidden="true">{deck.art}</span>
       <span className="deck-topline">
@@ -59,7 +108,7 @@ function DeckCard({ deck, progress, type, onNavigate }) {
       <span className="deck-progress" aria-hidden="true">
         <span style={{ width: `${percent}%` }} />
       </span>
-      <span className="deck-foot">{deck.unlocked ? metric.label : 'Locked for a later academy level'}</span>
+      <span className="deck-foot">{footLabel}</span>
     </button>
   );
 }
@@ -112,6 +161,18 @@ export default function DashboardPage({ user, progress, onNavigate, onLogout }) 
       quote: pickRandom(buddy.quotes),
     };
   }, []);
+  const lessonDecks = useMemo(
+    () => applyProgressiveUnlocks(LEARN_DECKS, safeProgress, 'learn'),
+    [safeProgress]
+  );
+  const practiceDecks = useMemo(
+    () => applyProgressiveUnlocks(PRACTICE_DECKS, safeProgress, 'practice'),
+    [safeProgress]
+  );
+  const gameDecks = useMemo(
+    () => applyGameUnlocks(safeProgress),
+    [safeProgress]
+  );
 
   return (
     <main className="screen-wrap dashboard-wrap">
@@ -161,7 +222,7 @@ export default function DashboardPage({ user, progress, onNavigate, onLogout }) 
         <DeckSection
           title="Academy Lessons"
           prompt={prompts.learn}
-          decks={LEARN_DECKS}
+          decks={lessonDecks}
           type="learn"
           progress={safeProgress}
           onNavigate={onNavigate}
@@ -170,7 +231,7 @@ export default function DashboardPage({ user, progress, onNavigate, onLogout }) 
         <DeckSection
           title="Practice Lagoon"
           prompt={prompts.practice}
-          decks={PRACTICE_DECKS}
+          decks={practiceDecks}
           type="practice"
           progress={safeProgress}
           onNavigate={onNavigate}
@@ -179,7 +240,7 @@ export default function DashboardPage({ user, progress, onNavigate, onLogout }) 
         <DeckSection
           title="Game Cove"
           prompt={prompts.games}
-          decks={GAME_DECKS}
+          decks={gameDecks}
           type="games"
           progress={safeProgress}
           onNavigate={onNavigate}

@@ -33,15 +33,7 @@
       "createdAt": "2026-05-17T02:56:54.144Z"
     }
   ],
-  "sessions": [
-    {
-      "token": "5314cbcda224c3f63b67eb81d7c8a82487d85a9ed2d6978d0f99605fdfb18e6f",
-      "userId": "c876f913-1fa6-4729-9726-b62526eb98b6",
-      "createdAt": "2026-05-17T03:04:01.502Z",
-      "expiresAt": "2026-06-16T03:04:01.504Z",
-      "lastSeenAt": "2026-05-17T03:20:59.897Z"
-    }
-  ],
+  "sessions": [],
   "progress": {
     "340dc899-c29c-4384-8053-b976206e6dbd": {
       "learnedLetters": [
@@ -105,18 +97,53 @@
     },
     "c876f913-1fa6-4729-9726-b62526eb98b6": {
       "learnedLetters": [
-        "A"
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
       ],
       "masteredLetters": [
         "A"
       ],
-      "practiceAttempts": 1,
-      "totalScore": 99,
+      "practiceAttempts": 6,
+      "totalScore": 574,
       "bestScores": {
-        "A": 99
+        "A": 99,
+        "D": 95,
+        "N": 95,
+        "T": 95,
+        "B": 95,
+        "L": 95
       },
       "practiceCounts": {
-        "A": 1
+        "A": 1,
+        "D": 1,
+        "N": 1,
+        "T": 1,
+        "B": 1,
+        "L": 1
       },
       "masteryRecords": {
         "A": {
@@ -126,6 +153,46 @@
       },
       "recentPractice": [
         {
+          "letter": "L",
+          "score": 95,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T05:03:08.625Z"
+        },
+        {
+          "letter": "B",
+          "score": 95,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T05:03:08.611Z"
+        },
+        {
+          "letter": "T",
+          "score": 95,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T05:03:08.594Z"
+        },
+        {
+          "letter": "N",
+          "score": 95,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T04:49:39.878Z"
+        },
+        {
+          "letter": "D",
+          "score": 95,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T04:49:39.475Z"
+        },
+        {
           "letter": "A",
           "score": 99,
           "passed": true,
@@ -134,7 +201,7 @@
           "at": "2026-05-17T02:57:52.737Z"
         }
       ],
-      "lastActivityAt": "2026-05-17T02:57:52.737Z"
+      "lastActivityAt": "2026-05-17T05:03:08.625Z"
     }
   }
 }
