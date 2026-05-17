@@ -131,7 +131,7 @@ export default function GestureController({ children, showCameraToggle = false, 
   const lastScrollPointRef = useRef(null);
   const lastScrollAtRef = useRef(0);
   const activeTargetRef = useRef(null);
-  const [cameraOn, setCameraOn] = useState(true);
+  const [cameraOn, setCameraOn] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {

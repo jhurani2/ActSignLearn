@@ -127,7 +127,7 @@ function buildProfile(answers) {
   };
 }
 
-export default function LearnerOnboardingQuiz({ user, saving, onComplete }) {
+export default function LearnerOnboardingQuiz({ user, retake = false, saving, onComplete }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState('');
@@ -181,10 +181,10 @@ export default function LearnerOnboardingQuiz({ user, saving, onComplete }) {
       <section className="onboarding-shell card-shell" aria-labelledby="onboarding-title">
         <div className="onboarding-hero">
           <div>
-            <p className="eyebrow">New learner setup</p>
-            <h1 id="onboarding-title" className="page-title">Let&apos;s personalize your ASL path</h1>
+            <p className="eyebrow">{retake ? 'Plan refresh quiz' : 'New learner setup'}</p>
+            <h1 id="onboarding-title" className="page-title">{retake ? 'Let&apos;s tune your ASL path' : 'Let&apos;s personalize your ASL path'}</h1>
             <p className="page-subtitle">
-              Answer a few quick questions so your future mastery plan can start from the right place.
+              Answer a few quick questions so your next mastery plan can start from the right place.
             </p>
           </div>
           <article className="onboarding-buddy-note">
@@ -221,7 +221,7 @@ export default function LearnerOnboardingQuiz({ user, saving, onComplete }) {
                 Back
               </button>
               <button className="primary-btn" type="button" onClick={goNext} disabled={saving}>
-                {saving ? 'Saving...' : isLastStep ? 'Create my profile' : 'Next'}
+                {saving ? 'Saving...' : isLastStep ? (retake ? 'Regenerate my plan' : 'Create my profile') : 'Next'}
               </button>
             </div>
           </section>

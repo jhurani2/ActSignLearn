@@ -1,270 +1,80 @@
 {
   "users": [
     {
-      "id": "340dc899-c29c-4384-8053-b976206e6dbd",
-      "username": "oilmmdsdn",
+      "id": "74fda7c0-abcf-4c5f-90d8-2b363a429729",
+      "username": "werty",
       "avatar": "otter",
-      "passwordHash": "0ce7ce4c02134ee3c053e2e769f1be855c647d684a44534acbbd4b0147219988cac053a6d242dd9b8413208ad20f08864d8115d41613bd07b0f8f7d2794f1dfd",
-      "passwordSalt": "dd974e137ebd6090098f269feb0bb79f",
-      "createdAt": "2026-05-17T00:10:40.066Z"
+      "passwordHash": "44d90155d64d125c375bedda3221c22ce179914d1e37a63b5b284d443e35747cfe5d00e747a579f7ffeea200ee22d45a20aeb858e5d62710c52dc684ae84d3a3",
+      "passwordSalt": "315027886ac8a831b66b0c6f11a80811",
+      "createdAt": "2026-05-17T08:01:36.794Z"
     },
     {
-      "id": "ef39fe2e-1e4f-479d-b68f-1f050fc81c7a",
-      "username": "ffdsfdffd",
-      "avatar": "ray",
-      "passwordHash": "c1d50efedb2e6ee7b35f452998f28e76372bdc0fb91861a0458a5bc500021b5876ac363619782aac3ef2b45a95c781a04e36ebe11b03265bb32961b4d8bb08a9",
-      "passwordSalt": "41a917675cb396bb0b18c4290e37e59e",
-      "createdAt": "2026-05-17T00:16:04.971Z"
-    },
-    {
-      "id": "9d0cec3a-9733-495a-8644-3d5c3ea13318",
-      "username": "dssdfdfdf",
+      "id": "f9b9494c-9a19-4007-ad91-5017f9dfb897",
+      "username": "pookie1",
       "avatar": "otter",
-      "passwordHash": "214f98a5a03ab9d50bed0d53f8d8d42683cf3fbe62e0718d22400a246becb1ba30710aee2d5e7ab57cd4fdeaed97c50b973433954d5a3eb131f6975fb47e167a",
-      "passwordSalt": "fe02ecba2704eeb2aa23ae1e39bca11c",
-      "createdAt": "2026-05-17T02:01:56.296Z"
-    },
-    {
-      "id": "c876f913-1fa6-4729-9726-b62526eb98b6",
-      "username": "milo",
-      "avatar": "otter",
-      "passwordHash": "cfb94838c735bc9556c34ef2f6aa7606f66c3c79fb3043d4df1ad278613a7b386d999b976a0f2c886061f68929972c4073a486c1ce6422d71fa3600ed5a6d46e",
-      "passwordSalt": "a91edbf1c5777a07e756f8d11535b8b3",
-      "createdAt": "2026-05-17T02:56:54.144Z"
-    },
-    {
-      "id": "0b5b9897-e9eb-4b9d-bc88-48e1a9985cb9",
-      "username": "pritika",
-      "avatar": "otter",
-      "passwordHash": "8fcf7866ec700ff4e1101ac1427fad264cc4be916bf73b6e6e07c3da8c954a3d2729f09d7e92a1bbb0ed3c932c8a78527e4b22ceb9b15b1a818fa8fe99e0a777",
-      "passwordSalt": "f654190b9c3257bbb18d70eebbebeb4b",
-      "createdAt": "2026-05-17T04:09:17.681Z"
-    },
-    {
-      "id": "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75",
-      "username": "aman",
-      "avatar": "otter",
-      "passwordHash": "d873f263b88e70a37493b31b03cd144ca55e123af1c7fec92f0d7b180b0bfe291a816013f4155b6f8949300a1bde3a13440aebbb49aee4fe6ed6dd5eccee0b4c",
-      "passwordSalt": "8bf63dc574d56ccee0ed4243d071a2cd",
-      "createdAt": "2026-05-17T07:37:17.317Z"
+      "passwordHash": "5845f726639fce59e614ef9e3bf6236b3c2b1eb4e51d3002375ea25d2c7f49f50f12848eb528dad78c6c50fe4e52f5c127c30721d668f1b717b5345308e399d2",
+      "passwordSalt": "e6612164bcd173cc283a69ff2d0d6e54",
+      "createdAt": "2026-05-17T13:00:41.875Z"
     }
   ],
-<<<<<<< HEAD
   "sessions": [
     {
-      "token": "5314cbcda224c3f63b67eb81d7c8a82487d85a9ed2d6978d0f99605fdfb18e6f",
-      "userId": "c876f913-1fa6-4729-9726-b62526eb98b6",
-      "createdAt": "2026-05-17T03:04:01.502Z",
-      "expiresAt": "2026-06-16T03:04:01.504Z",
-      "lastSeenAt": "2026-05-17T03:20:59.897Z"
-    },
-    {
-      "token": "fc0206eba95c6df1ebb4bea9d1955d977f26915f0903f585959a3d633da8e2b4",
-      "userId": "0b5b9897-e9eb-4b9d-bc88-48e1a9985cb9",
-      "createdAt": "2026-05-17T05:32:20.543Z",
-      "expiresAt": "2026-06-16T05:32:20.546Z",
-      "lastSeenAt": "2026-05-17T05:44:52.430Z"
+      "token": "d5c6cdfafbe93f70fb0d542ecaef683179fc0cfcc8fc0c30fadcb42bc91024ea",
+      "userId": "f9b9494c-9a19-4007-ad91-5017f9dfb897",
+      "createdAt": "2026-05-17T13:00:41.875Z",
+      "expiresAt": "2026-06-16T13:00:41.875Z",
+      "lastSeenAt": "2026-05-17T13:11:27.992Z"
     }
   ],
-=======
-  "sessions": [
-    {
-      "token": "6807aad79730c3ab4e1c51751b2ebb53f835c3e49e1b67de999f73bc88bb8ef2",
-      "userId": "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75",
-      "createdAt": "2026-05-17T07:37:17.321Z",
-      "expiresAt": "2026-06-16T07:37:17.321Z",
-      "lastSeenAt": "2026-05-17T07:38:19.096Z"
-    }
-  ],
->>>>>>> 71cb5a3755045c3a77fce6ae171b650599c4e8d9
   "progress": {
-    "340dc899-c29c-4384-8053-b976206e6dbd": {
+    "74fda7c0-abcf-4c5f-90d8-2b363a429729": {
       "learnedLetters": [
         "A",
         "B",
-        "C"
-      ],
-      "masteredLetters": [],
-      "practiceAttempts": 0,
-      "totalScore": 0,
-      "bestScores": {},
-      "recentPractice": [],
-      "lastActivityAt": "2026-05-17T00:11:50.869Z"
-    },
-    "ef39fe2e-1e4f-479d-b68f-1f050fc81c7a": {
-      "learnedLetters": [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E"
-      ],
-      "masteredLetters": [],
-      "practiceAttempts": 0,
-      "totalScore": 0,
-      "bestScores": {},
-      "recentPractice": [],
-      "lastActivityAt": "2026-05-17T00:31:08.050Z"
-    },
-    "9d0cec3a-9733-495a-8644-3d5c3ea13318": {
-      "learnedLetters": [
-        "A",
-        "B",
-        "C",
-        "D",
         "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "K",
-        "L",
-        "M",
-        "O",
-        "P",
-        "R",
-        "S",
-        "T",
-        "U",
-        "X",
-        "Y",
-        "Z"
-      ],
-      "masteredLetters": [],
-      "practiceAttempts": 0,
-      "totalScore": 0,
-      "bestScores": {},
-      "practiceCounts": {},
-      "recentPractice": [],
-      "lastActivityAt": "2026-05-17T02:21:29.327Z"
-    },
-    "c876f913-1fa6-4729-9726-b62526eb98b6": {
-      "learnedLetters": [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z"
+        "T"
       ],
       "masteredLetters": [
-        "A"
+        "B"
       ],
-      "practiceAttempts": 6,
-      "totalScore": 574,
+      "practiceAttempts": 2,
+      "totalScore": 197,
       "bestScores": {
-        "A": 99,
-        "D": 95,
-        "N": 95,
-        "T": 95,
-        "B": 95,
-        "L": 95
+        "A": 98,
+        "B": 99
       },
       "practiceCounts": {
         "A": 1,
-        "D": 1,
-        "N": 1,
-        "T": 1,
-        "B": 1,
-        "L": 1
+        "B": 1
       },
       "masteryRecords": {
-        "A": {
+        "B": {
           "score": 99,
-          "masteredAt": "2026-05-17T02:57:52.737Z"
+          "masteredAt": "2026-05-17T08:05:27.545Z"
         }
       },
       "recentPractice": [
         {
-          "letter": "L",
-          "score": 95,
-          "passed": false,
-          "practiceCount": 1,
-          "mastered": false,
-          "at": "2026-05-17T05:03:08.625Z"
-        },
-        {
           "letter": "B",
-          "score": 95,
-          "passed": false,
-          "practiceCount": 1,
-          "mastered": false,
-          "at": "2026-05-17T05:03:08.611Z"
-        },
-        {
-          "letter": "T",
-          "score": 95,
-          "passed": false,
-          "practiceCount": 1,
-          "mastered": false,
-          "at": "2026-05-17T05:03:08.594Z"
-        },
-        {
-          "letter": "N",
-          "score": 95,
-          "passed": false,
-          "practiceCount": 1,
-          "mastered": false,
-          "at": "2026-05-17T04:49:39.878Z"
-        },
-        {
-          "letter": "D",
-          "score": 95,
-          "passed": false,
-          "practiceCount": 1,
-          "mastered": false,
-          "at": "2026-05-17T04:49:39.475Z"
-        },
-        {
-          "letter": "A",
           "score": 99,
           "passed": true,
           "practiceCount": 1,
           "mastered": true,
-          "at": "2026-05-17T02:57:52.737Z"
+          "at": "2026-05-17T08:05:27.545Z"
+        },
+        {
+          "letter": "A",
+          "score": 98,
+          "passed": false,
+          "practiceCount": 1,
+          "mastered": false,
+          "at": "2026-05-17T08:05:12.175Z"
         }
       ],
-<<<<<<< HEAD
-      "lastActivityAt": "2026-05-17T02:57:52.737Z"
+      "planTimeSeconds": 95,
+      "lastActivityAt": "2026-05-17T12:55:57.052Z"
     },
-    "0b5b9897-e9eb-4b9d-bc88-48e1a9985cb9": {
-      "learnedLetters": [
-        "A",
-        "O"
-      ],
-      "masteredLetters": [],
-      "practiceAttempts": 0,
-      "totalScore": 0,
-      "bestScores": {},
-      "practiceCounts": {},
-      "masteryRecords": {},
-      "recentPractice": [],
-      "lastActivityAt": "2026-05-17T05:44:52.433Z"
-=======
-      "lastActivityAt": "2026-05-17T05:03:08.625Z"
->>>>>>> 71cb5a3755045c3a77fce6ae171b650599c4e8d9
-    },
-    "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75": {
+    "f9b9494c-9a19-4007-ad91-5017f9dfb897": {
       "learnedLetters": [],
       "masteredLetters": [],
       "practiceAttempts": 0,
@@ -273,35 +83,646 @@
       "practiceCounts": {},
       "masteryRecords": {},
       "recentPractice": [],
-      "lastActivityAt": "2026-05-17T07:37:17.321Z"
+      "planTimeSeconds": 24,
+      "lastActivityAt": "2026-05-17T13:10:52.471Z"
     }
   },
   "learnerProfiles": {
-    "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75": {
+    "74fda7c0-abcf-4c5f-90d8-2b363a429729": {
       "onboardingComplete": true,
-      "learnerType": "Game Sprinter",
-      "experienceLevel": "none",
+      "learnerType": "Visual Explorer",
+      "experienceLevel": "few_letters",
       "primaryGoal": "brand_new",
-      "preferredPracticeStyle": "games",
-      "practiceMood": "calm_guided",
+      "preferredPracticeStyle": "visual_model",
+      "practiceMood": "accuracy_focused",
       "schedulePreference": "twenty_plus_daily",
       "motivationStyle": "gentle_messages",
-      "firstMilestone": "fingerspell_name",
+      "firstMilestone": "master_tricky",
       "challengeAreas": [
-        "hand_shape"
+        "speed"
       ],
       "answers": {
         "goal": "brand_new",
-        "experience": "none",
-        "learnBest": "games",
-        "challenge": "hand_shape",
-        "practiceMood": "calm_guided",
+        "experience": "few_letters",
+        "learnBest": "visual_model",
+        "challenge": "speed",
+        "practiceMood": "accuracy_focused",
         "time": "twenty_plus_daily",
-        "milestone": "fingerspell_name",
+        "milestone": "master_tricky",
         "motivation": "gentle_messages"
       },
-      "createdAt": "2026-05-17T07:37:17.321Z",
-      "updatedAt": "2026-05-17T07:38:19.098Z"
+      "createdAt": "2026-05-17T08:01:36.794Z",
+      "updatedAt": "2026-05-17T08:02:23.198Z"
+    },
+    "f9b9494c-9a19-4007-ad91-5017f9dfb897": {
+      "onboardingComplete": true,
+      "learnerType": "Game Sprinter",
+      "experienceLevel": "some_signs",
+      "primaryGoal": "school_work",
+      "preferredPracticeStyle": "games",
+      "practiceMood": "game_like",
+      "schedulePreference": "flexible",
+      "motivationStyle": "scores_rankings",
+      "firstMilestone": "master_tricky",
+      "challengeAreas": [
+        "consistency"
+      ],
+      "answers": {
+        "goal": "school_work",
+        "experience": "some_signs",
+        "learnBest": "games",
+        "challenge": "consistency",
+        "practiceMood": "game_like",
+        "time": "flexible",
+        "milestone": "master_tricky",
+        "motivation": "scores_rankings"
+      },
+      "createdAt": "2026-05-17T13:00:41.875Z",
+      "updatedAt": "2026-05-17T13:10:13.708Z"
+    }
+  },
+  "personalizedPlans": {
+    "74fda7c0-abcf-4c5f-90d8-2b363a429729": {
+      "id": "plan-da6a3e58ef7c",
+      "version": 42,
+      "source": "groq-chat-completions+local-planner",
+      "generatedAt": "2026-05-17T13:00:09.988Z",
+      "refreshedAt": "2026-05-17T13:00:09.988Z",
+      "reason": "dashboard_refresh",
+      "status": "ready",
+      "learnerType": "Visual Explorer",
+      "title": "Fresh Start Signs",
+      "summary": "Boost hand-shape clarity with D, H, K, P",
+      "weeklyGoal": "Master 3 signs and review D, H, K, P",
+      "dailySessionMinutes": 22,
+      "recommendedStartDeckId": "alphabet",
+      "recommendedDeckOrder": [
+        {
+          "deckId": "alphabet",
+          "title": "Alphabet",
+          "mode": "learn",
+          "gameMode": "",
+          "reason": "Start with the clearest shapes."
+        },
+        {
+          "deckId": "alphabet-review",
+          "title": "Alphabet Review",
+          "mode": "practice",
+          "gameMode": "",
+          "reason": "Practice with camera feedback and extra hints."
+        },
+        {
+          "deckId": "speed-sign",
+          "title": "SpeedSign",
+          "mode": "practice",
+          "gameMode": "speed-sign",
+          "reason": "Use a quick round after practice."
+        }
+      ],
+      "focusLetters": [
+        "D",
+        "H",
+        "K",
+        "P"
+      ],
+      "primaryFocusLetters": [
+        "D",
+        "H",
+        "K"
+      ],
+      "todaysPlan": [
+        {
+          "step": 1,
+          "title": "Warm up with D and H",
+          "durationMinutes": 6,
+          "deckId": "alphabet",
+          "activity": "Study D and H in Alphabet.",
+          "accessibilityNote": "Keep hints on."
+        },
+        {
+          "step": 2,
+          "title": "Practice the focus letters",
+          "durationMinutes": 11,
+          "deckId": "alphabet-review",
+          "activity": "Use camera feedback for D, H, K.",
+          "accessibilityNote": "Pause between tries."
+        },
+        {
+          "step": 3,
+          "title": "End with one best rep",
+          "durationMinutes": 6,
+          "deckId": "alphabet-review",
+          "activity": "Repeat your strongest letter.",
+          "accessibilityNote": "End on a win."
+        }
+      ],
+      "weeklyPlan": [
+        {
+          "day": 1,
+          "label": "Foundation",
+          "focus": [
+            "D",
+            "H"
+          ],
+          "durationMinutes": 22,
+          "activity": "Study the models slowly."
+        },
+        {
+          "day": 2,
+          "label": "Feedback",
+          "focus": [
+            "K",
+            "P"
+          ],
+          "durationMinutes": 22,
+          "activity": "Use camera feedback."
+        },
+        {
+          "day": 3,
+          "label": "Review",
+          "focus": [
+            "D",
+            "H",
+            "K",
+            "P"
+          ],
+          "durationMinutes": 22,
+          "activity": "Review earlier letters."
+        },
+        {
+          "day": 4,
+          "label": "Challenge",
+          "focus": [
+            "D",
+            "H"
+          ],
+          "durationMinutes": 22,
+          "activity": "Do a mastery check."
+        }
+      ],
+      "accessibility": {
+        "promptPace": "slow",
+        "hintLevel": "expanded",
+        "feedbackTone": "gentle",
+        "sessionLength": "long",
+        "visualSupport": "model first",
+        "motionPreference": "low pressure"
+      },
+      "quizSummary": [
+        {
+          "label": "Goal",
+          "value": "Brand new"
+        },
+        {
+          "label": "Level",
+          "value": "A few letters"
+        },
+        {
+          "label": "Practice",
+          "value": "Accuracy first"
+        },
+        {
+          "label": "Time",
+          "value": "20+ minutes daily"
+        },
+        {
+          "label": "Challenge",
+          "value": "Speed"
+        }
+      ],
+      "creationSummary": {
+        "summary": "Built from your quiz answers, scores, and unmastered letters.",
+        "signals": [
+          "Quiz goal: Brand new",
+          "Main challenge: Speed",
+          "Practice history: 2 attempts, 99% average",
+          "Needs review: A"
+        ]
+      },
+      "coachNote": "Focus on clear hand shapes this week",
+      "customization": [
+        {
+          "label": "Pace",
+          "value": "slow",
+          "reason": "From Accuracy first and 20+ minutes daily."
+        },
+        {
+          "label": "Hints",
+          "value": "expanded",
+          "reason": "Extra hints match the quiz answers."
+        },
+        {
+          "label": "Focus",
+          "value": "D, H, K, P",
+          "reason": "Based on the quiz, scores, and unmastered letters."
+        },
+        {
+          "label": "Motivation",
+          "value": "Gentle reminders",
+          "reason": "Used for coaching tone."
+        }
+      ],
+      "adaptationRules": [
+        "Below 80%: review the model before another try.",
+        "95%+ twice: move that letter into a faster round.",
+        "No practice for 3 days: use the shortest session next.",
+        "Keep hints on until a letter reaches 90% twice."
+      ],
+      "timeTracking": {
+        "totalSeconds": 95,
+        "byStep": {
+          "step-1": 66,
+          "step-2": 29
+        },
+        "byLetter": {
+          "E": 38,
+          "T": 57
+        },
+        "byDeck": {
+          "alphabet": 95
+        },
+        "byMode": {
+          "learn": 66,
+          "practice": 29
+        },
+        "recent": [
+          {
+            "seconds": 4,
+            "deckId": "alphabet",
+            "mode": "practice",
+            "letter": "T",
+            "step": 2,
+            "event": "back",
+            "at": "2026-05-17T12:55:57.052Z"
+          },
+          {
+            "seconds": 3,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "switch",
+            "at": "2026-05-17T12:55:53.360Z"
+          },
+          {
+            "seconds": 4,
+            "deckId": "alphabet",
+            "mode": "practice",
+            "letter": "T",
+            "step": 2,
+            "event": "back",
+            "at": "2026-05-17T12:46:56.165Z"
+          },
+          {
+            "seconds": 7,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "switch",
+            "at": "2026-05-17T12:46:51.920Z"
+          },
+          {
+            "seconds": 3,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "E",
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T12:44:39.112Z"
+          },
+          {
+            "seconds": 9,
+            "deckId": "alphabet",
+            "mode": "practice",
+            "letter": "T",
+            "step": 2,
+            "event": "back",
+            "at": "2026-05-17T12:42:44.638Z"
+          },
+          {
+            "seconds": 1,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "switch",
+            "at": "2026-05-17T12:42:35.340Z"
+          },
+          {
+            "seconds": 9,
+            "deckId": "alphabet",
+            "mode": "practice",
+            "letter": "T",
+            "step": 2,
+            "event": "back",
+            "at": "2026-05-17T12:42:24.622Z"
+          },
+          {
+            "seconds": 1,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "switch",
+            "at": "2026-05-17T12:42:15.917Z"
+          },
+          {
+            "seconds": 11,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T12:41:51.589Z"
+          },
+          {
+            "seconds": 2,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T12:38:34.368Z"
+          },
+          {
+            "seconds": 6,
+            "deckId": "alphabet",
+            "mode": "learn",
+            "letter": "T",
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T12:38:30.470Z"
+          }
+        ],
+        "updatedAt": "2026-05-17T12:55:57.052Z"
+      },
+      "llmAgent": {
+        "status": "called",
+        "source": "groq-chat-completions",
+        "model": "llama-3.3-70b-versatile",
+        "message": "Groq refined the plan wording."
+      },
+      "agentTrace": [
+        {
+          "stage": "Quiz",
+          "output": "Brand new; Accuracy first."
+        },
+        {
+          "stage": "Planner",
+          "output": "Recommended D, H, K, P and Alphabet."
+        },
+        {
+          "stage": "LLM agent",
+          "output": "Groq refined the plan wording."
+        }
+      ]
+    },
+    "f9b9494c-9a19-4007-ad91-5017f9dfb897": {
+      "id": "plan-a4593157de14",
+      "version": 5,
+      "source": "groq-chat-completions+local-planner",
+      "generatedAt": "2026-05-17T13:11:28.417Z",
+      "refreshedAt": "2026-05-17T13:11:28.417Z",
+      "reason": "dashboard_refresh",
+      "status": "ready",
+      "learnerType": "Game Sprinter",
+      "title": "Confident Signs Plan",
+      "summary": "Boost clarity with A, D, and T",
+      "weeklyGoal": "Master A, D, and T with clean reps",
+      "dailySessionMinutes": 10,
+      "recommendedStartDeckId": "speed-sign",
+      "recommendedDeckOrder": [
+        {
+          "deckId": "speed-sign",
+          "title": "SpeedSign",
+          "mode": "practice",
+          "gameMode": "speed-sign",
+          "reason": "Use a quick round after practice."
+        },
+        {
+          "deckId": "alphabet",
+          "title": "Alphabet",
+          "mode": "learn",
+          "gameMode": "",
+          "reason": "Start with the clearest shapes."
+        },
+        {
+          "deckId": "alphabet-review",
+          "title": "Alphabet Review",
+          "mode": "practice",
+          "gameMode": "",
+          "reason": "Turn letters into better scores."
+        }
+      ],
+      "focusLetters": [
+        "A",
+        "D",
+        "T"
+      ],
+      "primaryFocusLetters": [
+        "A",
+        "D",
+        "T"
+      ],
+      "todaysPlan": [
+        {
+          "step": 1,
+          "title": "Warm up with A and D",
+          "durationMinutes": 3,
+          "deckId": "speed-sign",
+          "activity": "Study A and D in SpeedSign.",
+          "accessibilityNote": "Watch the model first."
+        },
+        {
+          "step": 2,
+          "title": "Practice the focus letters",
+          "durationMinutes": 5,
+          "deckId": "alphabet-review",
+          "activity": "Use camera feedback for A, D, T.",
+          "accessibilityNote": "Pause between tries."
+        },
+        {
+          "step": 3,
+          "title": "End with a short game",
+          "durationMinutes": 3,
+          "deckId": "speed-sign",
+          "activity": "Try SpeedSign after two clear reps.",
+          "accessibilityNote": "Save the score."
+        }
+      ],
+      "weeklyPlan": [
+        {
+          "day": 1,
+          "label": "Foundation",
+          "focus": [
+            "A",
+            "D"
+          ],
+          "durationMinutes": 10,
+          "activity": "Study the models slowly."
+        },
+        {
+          "day": 2,
+          "label": "Feedback",
+          "focus": [
+            "T"
+          ],
+          "durationMinutes": 10,
+          "activity": "Use camera feedback."
+        },
+        {
+          "day": 3,
+          "label": "Review",
+          "focus": [
+            "A",
+            "D",
+            "T"
+          ],
+          "durationMinutes": 10,
+          "activity": "Review earlier letters."
+        },
+        {
+          "day": 4,
+          "label": "Challenge",
+          "focus": [
+            "A",
+            "D"
+          ],
+          "durationMinutes": 10,
+          "activity": "Try SpeedSign."
+        }
+      ],
+      "accessibility": {
+        "promptPace": "balanced",
+        "hintLevel": "standard",
+        "feedbackTone": "direct",
+        "sessionLength": "standard",
+        "visualSupport": "model and camera",
+        "motionPreference": "standard"
+      },
+      "quizSummary": [
+        {
+          "label": "Goal",
+          "value": "School or work"
+        },
+        {
+          "label": "Level",
+          "value": "Some signs"
+        },
+        {
+          "label": "Practice",
+          "value": "Game-like"
+        },
+        {
+          "label": "Time",
+          "value": "Flexible"
+        },
+        {
+          "label": "Challenge",
+          "value": "Consistency"
+        }
+      ],
+      "creationSummary": {
+        "summary": "Built from your quiz answers, scores, and unmastered letters.",
+        "signals": [
+          "Quiz goal: School or work",
+          "Main challenge: Consistency",
+          "Practice history: no scored attempts yet",
+          "Next letters: E, M, N"
+        ]
+      },
+      "coachNote": "Focus on slow and accurate signs before speeding up",
+      "customization": [
+        {
+          "label": "Pace",
+          "value": "balanced",
+          "reason": "From Game-like and Flexible."
+        },
+        {
+          "label": "Hints",
+          "value": "standard",
+          "reason": "Standard hints keep practice quick."
+        },
+        {
+          "label": "Focus",
+          "value": "A, D, T",
+          "reason": "Based on the quiz, scores, and unmastered letters."
+        },
+        {
+          "label": "Motivation",
+          "value": "Scores",
+          "reason": "Used for coaching tone."
+        }
+      ],
+      "adaptationRules": [
+        "Below 80%: review the model before another try.",
+        "95%+ twice: move that letter into a faster round.",
+        "No practice for 3 days: use the shortest session next."
+      ],
+      "timeTracking": {
+        "totalSeconds": 24,
+        "byStep": {
+          "step-1": 24
+        },
+        "byLetter": {},
+        "byDeck": {
+          "speed-sign": 24
+        },
+        "byMode": {
+          "speed-sign": 24
+        },
+        "recent": [
+          {
+            "seconds": 9,
+            "deckId": "speed-sign",
+            "mode": "speed-sign",
+            "letter": null,
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T13:10:52.471Z"
+          },
+          {
+            "seconds": 6,
+            "deckId": "speed-sign",
+            "mode": "speed-sign",
+            "letter": null,
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T13:10:39.328Z"
+          },
+          {
+            "seconds": 9,
+            "deckId": "speed-sign",
+            "mode": "speed-sign",
+            "letter": null,
+            "step": 1,
+            "event": "back",
+            "at": "2026-05-17T13:10:30.435Z"
+          }
+        ],
+        "updatedAt": "2026-05-17T13:10:52.471Z"
+      },
+      "llmAgent": {
+        "status": "called",
+        "source": "groq-chat-completions",
+        "model": "llama-3.3-70b-versatile",
+        "message": "Groq refined the plan wording."
+      },
+      "agentTrace": [
+        {
+          "stage": "Quiz",
+          "output": "School or work; Game-like."
+        },
+        {
+          "stage": "Planner",
+          "output": "Recommended A, D, T and SpeedSign."
+        },
+        {
+          "stage": "LLM agent",
+          "output": "Groq refined the plan wording."
+        }
+      ]
     }
   }
 }
