@@ -79,6 +79,7 @@ app.post('/api/auth/signup', (req, res) => {
 
     db.users.push(newUser);
     db.progress[newUser.id] = defaultProgress();
+    db.learnerProfiles[newUser.id] = defaultLearnerProfile();
     const session = createSession(newUser.id);
     db.sessions.push(session);
     writeDatabase(db);
@@ -87,6 +88,7 @@ app.post('/api/auth/signup', (req, res) => {
       token: session.token,
       user: toPublicUser(newUser),
       progress: buildProgressSummary(db.progress[newUser.id]),
+      learnerProfile: buildLearnerProfileSummary(db.learnerProfiles[newUser.id]),
     });
   } catch (error) {
     console.error(error);
@@ -126,6 +128,7 @@ app.post('/api/auth/signin', (req, res) => {
       token: session.token,
       user: toPublicUser(user),
       progress: buildProgressSummary(db.progress[user.id]),
+      learnerProfile: getLearnerProfileForUser(db, user.id),
     });
   } catch (error) {
     console.error(error);
@@ -134,7 +137,10 @@ app.post('/api/auth/signin', (req, res) => {
 });
 
 app.get('/api/auth/session', requireAuth, (req, res) => {
-  return res.json({ user: toPublicUser(req.user) });
+  return res.json({
+    user: toPublicUser(req.user),
+    learnerProfile: getLearnerProfileForUser(req.db, req.user.id),
+  });
 });
 
 app.post('/api/auth/logout', requireAuth, (req, res) => {
@@ -151,6 +157,21 @@ app.get('/api/progress/summary', requireAuth, (req, res) => {
     writeDatabase(req.db);
   }
   return res.json({ progress: buildProgressSummary(progress) });
+});
+
+app.get('/api/profile/learner', requireAuth, (req, res) => {
+  return res.json({ learnerProfile: getLearnerProfileForUser(req.db, req.user.id) });
+});
+
+app.post('/api/profile/learner', requireAuth, (req, res) => {
+  const profile = normalizeLearnerProfile(req.body?.profile || req.body, {
+    existingProfile: req.db.learnerProfiles?.[req.user.id],
+  });
+
+  req.db.learnerProfiles[req.user.id] = profile;
+  writeDatabase(req.db);
+
+  return res.json({ learnerProfile: buildLearnerProfileSummary(profile) });
 });
 
 app.post('/api/progress/learn', requireAuth, (req, res) => {
@@ -1028,6 +1049,7 @@ function ensureDatabase() {
       users: [],
       sessions: [],
       progress: {},
+      learnerProfiles: {},
     });
   }
 }
@@ -1040,12 +1062,14 @@ function readDatabase() {
       users: Array.isArray(parsed.users) ? parsed.users : [],
       sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
       progress: parsed.progress && typeof parsed.progress === 'object' ? parsed.progress : {},
+      learnerProfiles: parsed.learnerProfiles && typeof parsed.learnerProfiles === 'object' ? parsed.learnerProfiles : {},
     };
   } catch {
     return {
       users: [],
       sessions: [],
       progress: {},
+      learnerProfiles: {},
     };
   }
 }
@@ -1095,6 +1119,111 @@ function buildProgressSummary(progress) {
     recentPractice: Array.isArray(safeProgress.recentPractice) ? safeProgress.recentPractice.slice(0, 10) : [],
     lastActivityAt: safeProgress.lastActivityAt || null,
   };
+}
+
+function defaultLearnerProfile() {
+  const timestamp = new Date().toISOString();
+  return {
+    onboardingComplete: false,
+    learnerType: '',
+    experienceLevel: '',
+    primaryGoal: '',
+    preferredPracticeStyle: '',
+    practiceMood: '',
+    schedulePreference: '',
+    motivationStyle: '',
+    firstMilestone: '',
+    challengeAreas: [],
+    answers: {},
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+const LEARNER_PROFILE_OPTIONS = {
+  goal: ['brand_new', 'alphabet_first', 'communication', 'school_work', 'speed_accuracy'],
+  experience: ['none', 'few_letters', 'alphabet_slowly', 'some_signs', 'reviewing'],
+  learnBest: ['steps', 'visual_model', 'instant_feedback', 'games', 'repetition'],
+  challenge: ['remembering', 'hand_shape', 'speed', 'confidence', 'consistency'],
+  practiceMood: ['calm_guided', 'game_like', 'accuracy_focused', 'short_daily', 'competitive'],
+  time: ['five_min_daily', 'ten_fifteen_daily', 'twenty_plus_daily', 'few_times_week', 'flexible'],
+  milestone: ['learn_az', 'master_tricky', 'fingerspell_name', 'daily_confidence', 'high_accuracy'],
+  motivation: ['streaks_badges', 'gentle_messages', 'goals_checklists', 'scores_rankings', 'self_directed'],
+};
+
+function getLearnerProfileForUser(db, userId) {
+  const profile = db.learnerProfiles?.[userId];
+  return profile ? buildLearnerProfileSummary(profile) : null;
+}
+
+function buildLearnerProfileSummary(profile) {
+  return normalizeLearnerProfile(profile, { preserveCompletion: true });
+}
+
+function normalizeLearnerProfile(profile, options = {}) {
+  const existingProfile = options.existingProfile && typeof options.existingProfile === 'object'
+    ? options.existingProfile
+    : null;
+  const base = existingProfile || defaultLearnerProfile();
+  const source = profile && typeof profile === 'object' ? profile : {};
+  const answers = source.answers && typeof source.answers === 'object' ? source.answers : {};
+  const now = new Date().toISOString();
+
+  const normalizedAnswers = Object.entries(LEARNER_PROFILE_OPTIONS).reduce((acc, [key, allowedValues]) => {
+    acc[key] = sanitizeOption(answers[key] || source[key], allowedValues);
+    return acc;
+  }, {});
+
+  const challengeArea = normalizedAnswers.challenge;
+  const learnerType = sanitizeText(source.learnerType, 48) || deriveLearnerType(normalizedAnswers);
+
+  return {
+    onboardingComplete: options.preserveCompletion
+      ? Boolean(source.onboardingComplete)
+      : true,
+    learnerType,
+    experienceLevel: normalizedAnswers.experience,
+    primaryGoal: normalizedAnswers.goal,
+    preferredPracticeStyle: normalizedAnswers.learnBest,
+    practiceMood: normalizedAnswers.practiceMood,
+    schedulePreference: normalizedAnswers.time,
+    motivationStyle: normalizedAnswers.motivation,
+    firstMilestone: normalizedAnswers.milestone,
+    challengeAreas: challengeArea ? [challengeArea] : [],
+    answers: normalizedAnswers,
+    createdAt: sanitizeText(source.createdAt || base.createdAt, 40) || now,
+    updatedAt: options.preserveCompletion
+      ? sanitizeText(source.updatedAt || base.updatedAt, 40) || now
+      : now,
+  };
+}
+
+function sanitizeOption(value, allowedValues) {
+  const safe = String(value || '').trim();
+  return allowedValues.includes(safe) ? safe : '';
+}
+
+function sanitizeText(value, maxLength) {
+  return String(value || '').trim().slice(0, maxLength);
+}
+
+function deriveLearnerType(answers) {
+  if (answers.practiceMood === 'game_like' || answers.practiceMood === 'competitive' || answers.learnBest === 'games') {
+    return 'Game Sprinter';
+  }
+  if (answers.primaryGoal === 'communication') {
+    return 'Communication Builder';
+  }
+  if (answers.learnBest === 'visual_model') {
+    return 'Visual Explorer';
+  }
+  if (answers.practiceMood === 'accuracy_focused' || answers.primaryGoal === 'speed_accuracy') {
+    return 'Accuracy Tuner';
+  }
+  if (answers.schedulePreference === 'five_min_daily' || answers.schedulePreference === 'ten_fifteen_daily') {
+    return 'Consistency Learner';
+  }
+  return 'Guided Builder';
 }
 
 function normalizeProgress(progress) {

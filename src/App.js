@@ -3,6 +3,7 @@ import LoginPage from './components/auth/LoginPage';
 import GestureController from './components/gesture/GestureController';
 import DashboardPage from './components/dashboard/DashboardPage';
 import LaunchSequence from './components/LaunchSequence';
+import LearnerOnboardingQuiz from './components/onboarding/LearnerOnboardingQuiz';
 import UnderwaterBackground from './components/theme/UnderwaterBackground';
 import ActSignLearnStudio from './ActSignLearnStudio';
 import {
@@ -11,6 +12,7 @@ import {
   logout,
   markLearned,
   recordPractice,
+  saveLearnerProfile,
   signIn,
   signUp,
 } from './services/api';
@@ -28,6 +30,8 @@ export default function App() {
   const [progress, setProgress] = useState(null);
   const [activeDeck, setActiveDeck] = useState(null);
   const [launchDone, setLaunchDone] = useState(false);
+  const [learnerProfile, setLearnerProfile] = useState(null);
+  const [savingLearnerProfile, setSavingLearnerProfile] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -44,6 +48,7 @@ export default function App() {
         if (!isMounted) return;
         setToken(savedToken);
         setUser(session.user);
+        setLearnerProfile(session.learnerProfile || null);
         setAuthStatus('authenticated');
         window.localStorage.setItem(TOKEN_KEY, savedToken);
         window.localStorage.removeItem(LEGACY_TOKEN_KEY);
@@ -87,6 +92,7 @@ export default function App() {
       setToken(result.token);
       setUser(result.user);
       setProgress(result.progress || null);
+      setLearnerProfile(result.learnerProfile || null);
       setAuthStatus('authenticated');
       setPage('dashboard');
       setActiveDeck(null);
@@ -103,6 +109,7 @@ export default function App() {
     setToken('');
     setUser(null);
     setProgress(null);
+    setLearnerProfile(null);
     setPage('dashboard');
     setActiveDeck(null);
     window.localStorage.removeItem(TOKEN_KEY);
@@ -132,6 +139,20 @@ export default function App() {
     setLaunchDone(true);
   }, []);
 
+  const completeLearnerOnboarding = async (profile) => {
+    if (!token) return;
+
+    setSavingLearnerProfile(true);
+    try {
+      const response = await saveLearnerProfile(token, profile);
+      setLearnerProfile(response.learnerProfile || profile);
+      setPage('dashboard');
+      setActiveDeck(null);
+    } finally {
+      setSavingLearnerProfile(false);
+    }
+  };
+
   let view;
   if (!launchDone) {
     view = <LaunchSequence onComplete={finishLaunch} />;
@@ -139,6 +160,14 @@ export default function App() {
     view = <div className="center-loader">Loading ASL...</div>;
   } else if (authStatus !== 'authenticated') {
     view = <LoginPage onSubmit={authSubmit} loading={authLoading} />;
+  } else if (learnerProfile && !learnerProfile.onboardingComplete) {
+    view = (
+      <LearnerOnboardingQuiz
+        user={user}
+        saving={savingLearnerProfile}
+        onComplete={completeLearnerOnboarding}
+      />
+    );
   } else if (page === 'dashboard') {
     view = (
       <DashboardPage
