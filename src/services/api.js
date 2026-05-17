@@ -58,6 +58,25 @@ export async function getProgress(token) {
   });
 }
 
+export async function getLearnerProfile(token) {
+  return request('/profile/learner', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function saveLearnerProfile(token, profile) {
+  return request('/profile/learner', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ profile }),
+  });
+}
+
 export async function markLearned(token, letter) {
   return request('/progress/learn', {
     method: 'POST',

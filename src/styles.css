@@ -710,6 +710,182 @@ input:focus-visible {
   margin-top: 0.62rem;
 }
 
+.onboarding-wrap {
+  min-height: calc(100vh - 2.6rem);
+  display: flex;
+}
+
+.onboarding-shell {
+  flex: 1;
+  padding: clamp(1rem, 2.4vw, 2rem);
+}
+
+.onboarding-hero {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.onboarding-hero > div:first-child {
+  max-width: 680px;
+}
+
+.onboarding-buddy-note {
+  align-items: center;
+  background: rgba(244, 254, 255, 0.88);
+  border: 1px solid rgba(7, 89, 118, 0.16);
+  border-radius: 14px;
+  display: grid;
+  gap: 0.72rem;
+  grid-template-columns: 58px minmax(0, 1fr);
+  max-width: 430px;
+  padding: 0.78rem;
+}
+
+.onboarding-buddy-note img {
+  filter: drop-shadow(0 8px 14px rgba(5, 68, 94, 0.18));
+  height: 58px;
+  width: 58px;
+}
+
+.onboarding-buddy-note p {
+  color: #185c86;
+  font-weight: 800;
+}
+
+.quiz-progress {
+  background: rgba(7, 85, 112, 0.13);
+  border-radius: 999px;
+  height: 10px;
+  margin-top: 1.3rem;
+  overflow: hidden;
+}
+
+.quiz-progress span {
+  background: linear-gradient(90deg, #087ec0 0%, #1d9b77 64%, #ffd04d 100%);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 260ms ease;
+}
+
+.quiz-layout {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  margin-top: 1rem;
+}
+
+.quiz-question-card,
+.quiz-profile-preview {
+  padding: 1rem;
+}
+
+.quiz-question-card h2,
+.quiz-profile-preview h2 {
+  color: #073d62;
+  font-family: var(--font-heading);
+  font-size: 1.72rem;
+  line-height: 1.04;
+  margin-top: 0.22rem;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 0.62rem;
+  margin-top: 0.95rem;
+}
+
+.quiz-option {
+  background: rgba(245, 252, 255, 0.92);
+  border: 1px solid rgba(7, 89, 118, 0.18);
+  border-radius: 12px;
+  color: #15577d;
+  display: grid;
+  gap: 0.16rem;
+  min-height: 72px;
+  padding: 0.72rem 0.82rem;
+  text-align: left;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.quiz-option:hover,
+.quiz-option.active {
+  background: #f8fdff;
+  border-color: rgba(8, 126, 164, 0.38);
+  box-shadow: 0 8px 18px rgba(7, 61, 98, 0.1);
+  transform: translateY(-1px);
+}
+
+.quiz-option.active {
+  box-shadow: 0 0 0 3px rgba(8, 126, 192, 0.18);
+}
+
+.quiz-option strong {
+  color: #073d62;
+  font-size: 1rem;
+}
+
+.quiz-option span {
+  color: #315d77;
+  font-weight: 800;
+}
+
+.quiz-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.72rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.quiz-nav .ghost-btn,
+.quiz-nav .primary-btn {
+  min-width: 128px;
+}
+
+.quiz-profile-preview {
+  background: linear-gradient(180deg, rgba(244, 254, 255, 0.94), rgba(223, 247, 255, 0.9));
+  display: grid;
+  gap: 0.72rem;
+}
+
+.quiz-profile-preview > p {
+  color: #185c86;
+  font-weight: 800;
+}
+
+.quiz-profile-preview dl {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.quiz-profile-preview dl div {
+  background: rgba(7, 85, 112, 0.1);
+  border: 1px solid rgba(7, 89, 118, 0.12);
+  border-radius: 12px;
+  padding: 0.62rem;
+}
+
+.quiz-profile-preview dt {
+  color: #315d77;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quiz-profile-preview dd {
+  color: #04395f;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.05;
+  margin-top: 0.12rem;
+}
+
 .dashboard-shell,
 .studio-shell {
   padding: clamp(1rem, 2vw, 2rem);
@@ -2405,6 +2581,7 @@ input:focus-visible {
 
   .learn-layout,
   .practice-mode,
+  .quiz-layout,
   .speed-setup-card,
   .speed-game-grid {
     grid-template-columns: 1fr;
@@ -2463,8 +2640,27 @@ input:focus-visible {
 
   .auth-card,
   .dashboard-shell,
+  .onboarding-shell,
   .studio-shell {
     padding: 1rem;
+  }
+
+  .onboarding-buddy-note {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .onboarding-buddy-note img {
+    height: 44px;
+    width: 44px;
+  }
+
+  .quiz-nav {
+    justify-content: stretch;
+  }
+
+  .quiz-nav .ghost-btn,
+  .quiz-nav .primary-btn {
+    flex: 1 1 130px;
   }
 
   .tip-card {

@@ -33,6 +33,7 @@
       "createdAt": "2026-05-17T02:56:54.144Z"
     },
     {
+<<<<<<< HEAD
       "id": "0b5b9897-e9eb-4b9d-bc88-48e1a9985cb9",
       "username": "pritika",
       "avatar": "otter",
@@ -61,6 +62,25 @@
 =======
   "sessions": [],
 >>>>>>> 71cb5a3755045c3a77fce6ae171b650599c4e8d9
+=======
+      "id": "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75",
+      "username": "aman",
+      "avatar": "otter",
+      "passwordHash": "d873f263b88e70a37493b31b03cd144ca55e123af1c7fec92f0d7b180b0bfe291a816013f4155b6f8949300a1bde3a13440aebbb49aee4fe6ed6dd5eccee0b4c",
+      "passwordSalt": "8bf63dc574d56ccee0ed4243d071a2cd",
+      "createdAt": "2026-05-17T07:37:17.317Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "6807aad79730c3ab4e1c51751b2ebb53f835c3e49e1b67de999f73bc88bb8ef2",
+      "userId": "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75",
+      "createdAt": "2026-05-17T07:37:17.321Z",
+      "expiresAt": "2026-06-16T07:37:17.321Z",
+      "lastSeenAt": "2026-05-17T07:38:19.096Z"
+    }
+  ],
+>>>>>>> 5a423a1 (Quiz added for user plans)
   "progress": {
     "340dc899-c29c-4384-8053-b976206e6dbd": {
       "learnedLetters": [
@@ -246,7 +266,49 @@
       "lastActivityAt": "2026-05-17T05:44:52.433Z"
 =======
       "lastActivityAt": "2026-05-17T05:03:08.625Z"
+<<<<<<< HEAD
 >>>>>>> 71cb5a3755045c3a77fce6ae171b650599c4e8d9
+=======
+    },
+    "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75": {
+      "learnedLetters": [],
+      "masteredLetters": [],
+      "practiceAttempts": 0,
+      "totalScore": 0,
+      "bestScores": {},
+      "practiceCounts": {},
+      "masteryRecords": {},
+      "recentPractice": [],
+      "lastActivityAt": "2026-05-17T07:37:17.321Z"
+    }
+  },
+  "learnerProfiles": {
+    "31c44539-f19f-4bcc-9f2c-eb41ff2d3a75": {
+      "onboardingComplete": true,
+      "learnerType": "Game Sprinter",
+      "experienceLevel": "none",
+      "primaryGoal": "brand_new",
+      "preferredPracticeStyle": "games",
+      "practiceMood": "calm_guided",
+      "schedulePreference": "twenty_plus_daily",
+      "motivationStyle": "gentle_messages",
+      "firstMilestone": "fingerspell_name",
+      "challengeAreas": [
+        "hand_shape"
+      ],
+      "answers": {
+        "goal": "brand_new",
+        "experience": "none",
+        "learnBest": "games",
+        "challenge": "hand_shape",
+        "practiceMood": "calm_guided",
+        "time": "twenty_plus_daily",
+        "milestone": "fingerspell_name",
+        "motivation": "gentle_messages"
+      },
+      "createdAt": "2026-05-17T07:37:17.321Z",
+      "updatedAt": "2026-05-17T07:38:19.098Z"
+>>>>>>> 5a423a1 (Quiz added for user plans)
     }
   }
 }
