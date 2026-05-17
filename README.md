@@ -4,6 +4,8 @@ Real-time ASL learning with AI-powered personalized study plans and per-joint ha
 
 ---
 
+<img width="1470" height="956" alt="Screenshot 2026-05-17 at 9 25 53 AM" src="https://github.com/user-attachments/assets/326b85aa-c47f-4785-a1dc-e8ac007b32dc" />
+
 ## What is it?
 
 ActSignLearn is an ASL learning platform that watches your hands through your webcam and tells you exactly what to adjust — down to the individual finger joint. Unlike passive video tutorials, feedback happens every single frame, in real time.
@@ -25,6 +27,8 @@ Built at a hackathon. Built for the 48 million Americans with some degree of hea
 ## Tech Stack
 
 React 18 · MediaPipe Hands · TensorFlow.js · Groq API · IconScout API · HTML5 Canvas · WebRTC · Node.js
+
+<img width="500" height="296" alt="neural network_image" src="https://github.com/user-attachments/assets/a70581fd-96f4-4402-8fe5-c04a61f5f6a6" />
 
 ---
 
