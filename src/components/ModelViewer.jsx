@@ -81,7 +81,7 @@ function LoadingOverlay() {
         fontSize: 14,
         fontFamily: 'system-ui'
       }}>
-        Loading model…
+        Loading model...
       </div>
     </Html>
   );
@@ -166,7 +166,7 @@ export default function ModelViewer({ letter, modelUrl }) {
   };
 
   return (
-    <div className="model-slot" style={{ width: '100%', height: 420, position: 'relative', borderRadius: 18, overflow: 'hidden', background: '#111' }}>
+    <div className="model-slot">
       {useRemote && modelUrl && remoteAssetType === 'image' ? (
         <IconImageViewer src={modelUrl} letter={letter} />
       ) : (

@@ -9,15 +9,16 @@ export default function LearnMode({ letter, onPractice, onPrev, onNext }) {
     : null;
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
-      <div className="card" style={{ width: '100%', maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 18, alignItems: 'center' }}>
-        <div style={{ width: '100%', display: 'flex', gap: 28, alignItems: 'flex-start', justifyContent: 'center', padding: '36px 18px' }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontSize: 'clamp(140px,20vw,240px)', fontWeight: 900 }}>{letter}</div>
+    <div className="learn-mode">
+      <div className="learn-card card">
+        <div className="learn-layout">
+          <div className="learn-letter-panel">
+            <div className="learn-letter">{letter}</div>
+            <p>Current sign</p>
           </div>
 
-          <div style={{ width: 480, maxWidth: '48%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="learn-side-panel">
+            <div className="learn-model-card">
               <ModelViewer letter={letter} modelUrl={remoteModelUrl} />
             </div>
 
@@ -35,14 +36,14 @@ export default function LearnMode({ letter, onPractice, onPrev, onNext }) {
           </div>
         </div>
 
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingBottom: 18 }}>
-          <button className="primary-btn big-btn" onClick={onPractice}>practice this sign</button>
+        <div className="learn-actions">
+          <button className="primary-btn big-btn" type="button" onClick={onPractice}>Practice this sign</button>
         </div>
       </div>
 
       <div className="nav-controls">
-        <button className="ghost-btn big-btn" onClick={onPrev}>← previous</button>
-        <button className="ghost-btn big-btn" onClick={onNext}>next →</button>
+        <button className="ghost-btn big-btn" type="button" onClick={onPrev}>Previous</button>
+        <button className="ghost-btn big-btn" type="button" onClick={onNext}>Next</button>
       </div>
     </div>
   );

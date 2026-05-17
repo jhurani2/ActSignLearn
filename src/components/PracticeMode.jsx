@@ -1,34 +1,101 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera } from '@mediapipe/camera_utils';
-import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
-import { drawConnectors } from '@mediapipe/drawing_utils';
 import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
 
-export default function PracticeMode({ letter, onNext }) {
+const MEDIAPIPE_SCRIPT_URLS = [
+  'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js',
+  'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js',
+  'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js',
+];
+const FEEDBACK_HOLD_MS = 700;
+const SCORE_SMOOTHING = 0.35;
+const MASTERY_SCORE = 99;
+
+let mediaPipeReadyPromise = null;
+
+function loadExternalScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[data-mediapipe-src="${src}"]`);
+    if (existing) {
+      if (existing.getAttribute('data-loaded') === 'true') {
+        resolve();
+        return;
+      }
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-mediapipe-src', src);
+    script.addEventListener('load', () => {
+      script.setAttribute('data-loaded', 'true');
+      resolve();
+    });
+    script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
+    document.body.appendChild(script);
+  });
+}
+
+async function ensureMediapipeLoaded() {
+  if (!mediaPipeReadyPromise) {
+    mediaPipeReadyPromise = Promise.all(MEDIAPIPE_SCRIPT_URLS.map(loadExternalScript)).then(() => {
+      if (!window.Camera || !window.Hands || !window.HAND_CONNECTIONS || !window.drawConnectors) {
+        throw new Error('MediaPipe scripts loaded but required globals are missing.');
+      }
+    });
+  }
+  return mediaPipeReadyPromise;
+}
+
+export default function PracticeMode({ letter, onNext, onComplete }) {
   const [camOn, setCamOn] = useState(false);
   const [score, setScore] = useState(null);
+  const [bestSessionScore, setBestSessionScore] = useState(null);
   const [poseFeedback, setPoseFeedback] = useState('Start the camera to begin.');
   const [cameraError, setCameraError] = useState('');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraRef = useRef(null);
   const handsRef = useRef(null);
+  const smoothedScoreRef = useRef(null);
+  const bestSessionScoreRef = useRef(null);
+  const feedbackAtRef = useRef(0);
 
-  const handleNext = () => {
+  useEffect(() => {
     setScore(null);
+    setBestSessionScore(null);
+    setPoseFeedback('Start the camera to begin.');
+    setCameraError('');
+    smoothedScoreRef.current = null;
+    bestSessionScoreRef.current = null;
+    feedbackAtRef.current = 0;
+  }, [letter]);
+
+  const handleNext = async () => {
+    const savedScore = Math.max(score || 0, bestSessionScoreRef.current || 0);
+    if (typeof onComplete === 'function' && savedScore > 0) {
+      await onComplete({ letter, score: savedScore });
+    }
+    setScore(null);
+    setBestSessionScore(null);
+    smoothedScoreRef.current = null;
+    bestSessionScoreRef.current = null;
     setCamOn(false);
     onNext();
   };
 
-  const scoreColor = score >= 85 ? '#7bc96f' : score >= 70 ? '#c8a96e' : '#e07070';
-  const scoreBg   = score >= 85 ? '#1e2e1a' : score >= 70 ? '#2a2010' : '#2a1010';
-  const scoreBdr  = score >= 85 ? '#3a5c32' : score >= 70 ? '#5c4a1a' : '#5c2a2a';
-  const scoreMsg  = score >= 85
-    ? 'great form! move to next letter'
-    : score >= 70
-    ? 'almost — check the red joints'
+  const effectiveScore = Math.max(score || 0, bestSessionScore || 0);
+  const scoreMsg  = effectiveScore >= MASTERY_SCORE
+    ? 'mastery match! save this attempt'
+    : effectiveScore >= 85
+    ? 'great form, keep it steady for mastery'
+    : effectiveScore >= 70
+    ? 'almost, check the red joints'
     : 'try adjusting the red joints';
 
   const getFeedbackForJoint = (jointName) => {
@@ -75,6 +142,12 @@ export default function PracticeMode({ letter, onNext }) {
 
     const startStream = async () => {
       try {
+        await ensureMediapipeLoaded();
+        const Camera = window.Camera;
+        const Hands = window.Hands;
+        const HAND_CONNECTIONS = window.HAND_CONNECTIONS;
+        const drawConnectors = window.drawConnectors;
+
         setCameraError('');
         const hands = new Hands({
           locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
@@ -131,12 +204,6 @@ export default function PracticeMode({ letter, onNext }) {
               });
             }
 
-            const points63 = landmarks.flatMap((point) => [point.x, point.y, point.z]);
-            console.log(`hand ${handIndex + 1} 63 landmark values`, points63);
-            if (comparison) {
-              console.log(`hand ${handIndex + 1} normalized similarity`, comparison.similarity);
-            }
-
             const landmarkColors = comparison
               ? comparison.landmarkErrors.map((error) => (error > 0.16 ? '#ff5d5d' : '#b7ff72'))
               : landmarks.map(() => '#b7ff72');
@@ -183,7 +250,16 @@ export default function PracticeMode({ letter, onNext }) {
 
           if (bestMatch) {
             const scorePercent = Math.round(Math.max(0, Math.min(1, bestMatch.comparison.similarity)) * 100);
-            setScore(scorePercent);
+            const nextBestScore = Math.max(bestSessionScoreRef.current || 0, scorePercent);
+            bestSessionScoreRef.current = nextBestScore;
+            setBestSessionScore(nextBestScore);
+
+            const previousScore = smoothedScoreRef.current;
+            const smoothedScore = previousScore === null
+              ? scorePercent
+              : Math.round((previousScore * (1 - SCORE_SMOOTHING)) + (scorePercent * SCORE_SMOOTHING));
+            smoothedScoreRef.current = smoothedScore;
+            setScore(smoothedScore);
 
             const worstJointIndex = bestMatch.comparison.landmarkErrors.reduce(
               (worstIndex, currentError, index) => (
@@ -192,16 +268,22 @@ export default function PracticeMode({ letter, onNext }) {
               0
             );
             const worstJointName = HAND_LANDMARK_NAMES[worstJointIndex] || 'wrist';
-            const worstError = bestMatch.comparison.landmarkErrors[worstJointIndex];
+            const nextFeedback = scorePercent >= MASTERY_SCORE
+              ? 'Excellent match. This one can count as mastered.'
+              : scorePercent >= 85
+              ? 'Great match. Hold that shape steady.'
+              : getFeedbackForJoint(worstJointName);
+            const now = performance.now();
 
-            setPoseFeedback(
-              scorePercent >= 85
-                ? 'Great match. Keep it steady.'
-                : `${getFeedbackForJoint(worstJointName)} (${worstJointName}, ${worstError.toFixed(3)})`
-            );
+            if (scorePercent >= MASTERY_SCORE || now - feedbackAtRef.current > FEEDBACK_HOLD_MS) {
+              setPoseFeedback(nextFeedback);
+              feedbackAtRef.current = now;
+            }
           } else if (camOn) {
-            setScore(null);
-            setPoseFeedback('Keep your hand inside the green frame.');
+            if (smoothedScoreRef.current === null) {
+              setScore(null);
+              setPoseFeedback('Keep your hand inside the green frame.');
+            }
           }
 
           ctx.restore();
@@ -242,106 +324,90 @@ export default function PracticeMode({ letter, onNext }) {
       cancelled = true;
       stopStream();
     };
-  }, [camOn]);
+  }, [camOn, letter]);
 
   return (
-    <div className="flash-wrap">
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="card" style={{ width: '100%', maxWidth: 1040, height: '72vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
-          <div className="cam-box" style={{ width: '100%', height: '100%', maxWidth: 'none', aspectRatio: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {camOn ? (
-              <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  onLoadedMetadata={() => {
-                    const canvas = canvasRef.current;
-                    if (canvas && videoRef.current) {
-                      canvas.width = videoRef.current.videoWidth || 1280;
-                      canvas.height = videoRef.current.videoHeight || 720;
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '12px',
-                    transform: 'scaleX(-1)',
-                    background: '#000',
-                  }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    transform: 'scaleX(-1)',
-                    pointerEvents: 'none',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: '12% 14%',
-                    borderRadius: 20,
-                    border: '2px solid rgba(110, 255, 136, 0.9)',
-                    boxShadow: '0 0 0 9999px rgba(15, 23, 36, 0.12) inset, 0 0 24px rgba(110, 255, 136, 0.18)',
-                    pointerEvents: 'none',
-                  }}
-                />
-                <div style={{ position: 'absolute', top: 14, left: 14, padding: '8px 12px', borderRadius: 999, background: 'rgba(15,23,36,0.72)', color: 'white', fontSize: 12, letterSpacing: '0.06em' }}>
-                  live camera
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: '68px', opacity: 0.08 }}>◉</div>
-                <div style={{ fontSize: '16px', color: 'var(--muted)', letterSpacing: '0.06em' }}>camera off</div>
-              </>
-            )}
-          </div>
+    <div className="practice-mode">
+      <section className="practice-camera-card card" aria-label="Practice camera">
+        <div className="practice-camera-frame">
+          {camOn ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                onLoadedMetadata={() => {
+                  const canvas = canvasRef.current;
+                  if (canvas && videoRef.current) {
+                    canvas.width = videoRef.current.videoWidth || 1280;
+                    canvas.height = videoRef.current.videoHeight || 720;
+                  }
+                }}
+                className="practice-video"
+              />
+              <canvas ref={canvasRef} className="practice-canvas" />
+              <div className="camera-guide-frame" />
+              <div className="camera-live-badge">Live camera</div>
+            </>
+          ) : (
+            <div className="camera-empty">
+              <span className="camera-empty-icon" aria-hidden="true" />
+              <span>Camera off</span>
+            </div>
+          )}
         </div>
-      </div>
+      </section>
 
-      <div style={{ width: 420, minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div className="flash-card card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 220 }}>
-          <div style={{ fontSize: 80, fontWeight: 800 }}>{letter}</div>
+      <aside className="practice-sidebar">
+        <div className="practice-letter-card card">
+          <div className="practice-letter">{letter}</div>
         </div>
 
-        <div className="card">
+        <div className="feedback-card card">
           <div className="section-label">feedback</div>
 
           {score !== null ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
-              <div style={{ width: '96px', height: '96px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '28px', border: `2px solid transparent`, background: 'var(--glass)', color: 'var(--text)' }}>{score}%</div>
-              <div style={{ color: 'var(--muted)' }}>{scoreMsg}</div>
-              {score >= 85 && (
-                <button className="primary-btn" onClick={handleNext} style={{ width: '100%' }}>
-                  next →
-                </button>
-              )}
+            <div className="feedback-stack">
+              <div className="score-ring">{score}%</div>
+              <div className="feedback-summary">{scoreMsg}</div>
+              {bestSessionScore !== null ? (
+                <div className="best-score">Best read this round: {bestSessionScore}%</div>
+              ) : null}
+              <div className="hint-text">{poseFeedback}</div>
+              <button className="primary-btn" type="button" onClick={handleNext}>
+                Save attempt and next
+              </button>
             </div>
           ) : (
-            <div style={{ marginTop: 12 }}>
-              <div className="hint-text">{camOn ? 'show your hand & stay inside the frame' : 'start the camera to begin'}</div>
-              {cameraError ? <div className="hint-text" style={{ color: '#c0392b', marginTop: 8 }}>{cameraError}</div> : null}
+            <div className="feedback-stack">
+              <div className="hint-text">{camOn ? poseFeedback : 'start the camera to begin'}</div>
+              {cameraError ? <div className="hint-text error-text">{cameraError}</div> : null}
             </div>
           )}
 
-          <div style={{ marginTop: 14 }}>
-            <div className="section-label" style={{ marginBottom: 8 }}>tip</div>
+          <div className="tip-block">
+            <div className="section-label">tip</div>
             <div className="hint-text">{ASL_HINTS[letter]}</div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-            <button className={camOn ? 'ghost-btn' : 'primary-btn'} onClick={() => { setCamOn(c => !c); setScore(null); }}>{camOn ? 'stop camera' : 'start camera'}</button>
+          <div className="camera-actions">
+            <button
+              type="button"
+              className={camOn ? 'ghost-btn' : 'primary-btn'}
+              onClick={() => {
+                setCamOn((current) => !current);
+                setScore(null);
+                setBestSessionScore(null);
+                smoothedScoreRef.current = null;
+                bestSessionScoreRef.current = null;
+              }}
+            >
+              {camOn ? 'Stop camera' : 'Start camera'}
+            </button>
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   );
 }
