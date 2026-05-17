@@ -2,57 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
+import { ensureMediapipeLoaded } from '../utils/mediapipeLoader';
+import ModelViewer from './ModelViewer';
 
-const MEDIAPIPE_SCRIPT_URLS = [
-  'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js',
-];
 const FEEDBACK_HOLD_MS = 700;
 const SCORE_SMOOTHING = 0.35;
 const MASTERY_SCORE = 99;
 
-let mediaPipeReadyPromise = null;
-
-function loadExternalScript(src) {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[data-mediapipe-src="${src}"]`);
-    if (existing) {
-      if (existing.getAttribute('data-loaded') === 'true') {
-        resolve();
-        return;
-      }
-      existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    script.setAttribute('data-mediapipe-src', src);
-    script.addEventListener('load', () => {
-      script.setAttribute('data-loaded', 'true');
-      resolve();
-    });
-    script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
-    document.body.appendChild(script);
-  });
-}
-
-async function ensureMediapipeLoaded() {
-  if (!mediaPipeReadyPromise) {
-    mediaPipeReadyPromise = Promise.all(MEDIAPIPE_SCRIPT_URLS.map(loadExternalScript)).then(() => {
-      if (!window.Camera || !window.Hands || !window.HAND_CONNECTIONS || !window.drawConnectors) {
-        throw new Error('MediaPipe scripts loaded but required globals are missing.');
-      }
-    });
-  }
-  return mediaPipeReadyPromise;
-}
-
-export default function PracticeMode({ letter, onNext, onComplete }) {
+export default function PracticeMode({ letter, previousBestScore = 0, onNext, onComplete }) {
   const [camOn, setCamOn] = useState(false);
   const [score, setScore] = useState(null);
   const [bestSessionScore, setBestSessionScore] = useState(null);
@@ -362,10 +319,17 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
       <aside className="practice-sidebar">
         <div className="practice-letter-card card">
           <div className="practice-letter">{letter}</div>
+          <div className="practice-reference-model">
+            <ModelViewer letter={letter} />
+          </div>
         </div>
 
         <div className="feedback-card card">
           <div className="section-label">feedback</div>
+          <div className="previous-best-score">
+            <span>Previous best</span>
+            <strong>{previousBestScore > 0 ? `${previousBestScore}%` : 'No score yet'}</strong>
+          </div>
 
           {score !== null ? (
             <div className="feedback-stack">
