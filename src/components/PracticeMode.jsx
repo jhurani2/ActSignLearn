@@ -3,7 +3,6 @@ import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
 import { ensureMediapipeLoaded } from './gesture/mediapipe';
-import { ensureMediapipeLoaded } from '../utils/mediapipeLoader';
 import ModelViewer from './ModelViewer';
 
 const FEEDBACK_HOLD_MS = 700;
