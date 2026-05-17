@@ -137,7 +137,14 @@ function DeckSection({ title, prompt, decks, type, progress, onNavigate }) {
   );
 }
 
-export default function DashboardPage({ user, progress, onNavigate, onLogout }) {
+export default function DashboardPage({
+  user,
+  progress,
+  onNavigate,
+  onLogout,
+  gestureCameraOn,
+  onGestureCameraToggle,
+}) {
   const safeProgress = progress || {
     learnedCount: 0,
     masteredCount: 0,
@@ -185,7 +192,22 @@ export default function DashboardPage({ user, progress, onNavigate, onLogout }) 
               Choose a deck, visit the learning studio, or warm up in the practice lagoon.
             </p>
           </div>
-          <button type="button" className="ghost-btn" onClick={onLogout}>Log Out</button>
+          <div className="dashboard-top-actions">
+            {typeof onGestureCameraToggle === 'function' ? (
+              <button
+                type="button"
+                className="gesture-inline-toggle"
+                onClick={onGestureCameraToggle}
+                aria-label={`Camera gesture ${gestureCameraOn ? 'on' : 'off'}`}
+                title="Camera gesture"
+              >
+                <span className={`gesture-inline-dot ${gestureCameraOn ? 'on' : 'off'}`} aria-hidden="true" />
+                <span className="gesture-inline-label">camera gesture</span>
+                <span className="gesture-inline-state">{gestureCameraOn ? 'stop' : 'start'}</span>
+              </button>
+            ) : null}
+            <button type="button" className="ghost-btn" onClick={onLogout}>Log Out</button>
+          </div>
         </div>
 
         <div className="metrics-grid" role="list" aria-label="Learning progress overview">

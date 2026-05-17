@@ -68,6 +68,145 @@ input:focus-visible {
   isolation: isolate;
 }
 
+.gesture-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.gesture-video {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gesture-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: rgba(29, 155, 119, 0.16);
+  box-shadow: 0 0 0 8px rgba(0, 127, 149, 0.12);
+  opacity: 0;
+  transform: translate3d(-9999px, -9999px, 0) translate(-50%, -50%);
+  transition: opacity 120ms ease;
+}
+
+.gesture-cursor::after {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 999px;
+  content: '';
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+}
+
+.gesture-cursor[data-pinch='true'] {
+  background: rgba(236, 124, 147, 0.18);
+  border-color: rgba(236, 124, 147, 0.98);
+  box-shadow: 0 0 0 12px rgba(236, 124, 147, 0.16);
+}
+
+.gesture-hover-target {
+  box-shadow: 0 0 0 3px rgba(236, 124, 147, 0.22), 0 14px 28px rgba(1, 39, 73, 0.18) !important;
+  transform: translateY(-2px) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease !important;
+}
+
+.gesture-hud {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  max-width: min(320px, calc(100vw - 2rem));
+  border-radius: 16px;
+  border: 1px solid rgba(8, 97, 121, 0.18);
+  background: rgba(244, 254, 255, 0.9);
+  box-shadow: 0 16px 36px rgba(1, 39, 73, 0.18);
+  backdrop-filter: blur(8px);
+  color: #06416a;
+  padding: 0.8rem 0.9rem;
+  pointer-events: auto;
+}
+
+.gesture-hud p {
+  color: #165a89;
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+.gesture-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(29, 155, 119, 0.14);
+  color: #11624e;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.gesture-hud.error .gesture-pill {
+  background: rgba(255, 227, 231, 0.88);
+  color: #993040;
+}
+
+.gesture-inline-toggle {
+  align-items: center;
+  border: 1px solid rgba(8, 97, 121, 0.18);
+  border-radius: 999px;
+  background: rgba(244, 254, 255, 0.88);
+  color: #0b557f;
+  display: inline-flex;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.52rem 0.28rem 0.4rem;
+  text-transform: uppercase;
+}
+
+.gesture-inline-toggle:hover {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.gesture-inline-dot {
+  border-radius: 999px;
+  flex: 0 0 auto;
+  height: 8px;
+  width: 8px;
+}
+
+.gesture-inline-dot.on {
+  background: #1d9b77;
+  box-shadow: 0 0 0 3px rgba(29, 155, 119, 0.18);
+}
+
+.gesture-inline-dot.off {
+  background: #c45b6f;
+  box-shadow: 0 0 0 3px rgba(196, 91, 111, 0.18);
+}
+
+.gesture-inline-label {
+  color: #165a89;
+}
+
+.gesture-inline-state {
+  color: #073d62;
+}
+
 .ocean-scene {
   position: fixed;
   inset: 0;
@@ -589,6 +728,13 @@ input:focus-visible {
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   flex-wrap: wrap;
 }
 

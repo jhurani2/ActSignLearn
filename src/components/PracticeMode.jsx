@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
+import { ensureMediapipeLoaded } from './gesture/mediapipe';
 import { ensureMediapipeLoaded } from '../utils/mediapipeLoader';
 import ModelViewer from './ModelViewer';
 
@@ -150,14 +151,13 @@ export default function PracticeMode({ letter, previousBestScore = 0, onNext, on
               centroid.y >= detectionFrame.yMin &&
               centroid.y <= detectionFrame.yMax;
 
-            if (!inFrame) return;
-
             const comparison = referenceVector ? compareLandmarkVectors(landmarks, referenceVector) : null;
             if (comparison) {
               inFrameComparisons.push({
                 handIndex,
                 landmarks,
                 comparison,
+                inFrame,
               });
             }
 
@@ -202,11 +202,15 @@ export default function PracticeMode({ letter, previousBestScore = 0, onNext, on
           });
 
           const bestMatch = inFrameComparisons
+            .filter((item) => item.comparison && item.inFrame)
+            .sort((a, b) => b.comparison.similarity - a.comparison.similarity)[0];
+
+          const fallbackMatch = bestMatch || inFrameComparisons
             .filter((item) => item.comparison)
             .sort((a, b) => b.comparison.similarity - a.comparison.similarity)[0];
 
-          if (bestMatch) {
-            const scorePercent = Math.round(Math.max(0, Math.min(1, bestMatch.comparison.similarity)) * 100);
+          if (fallbackMatch) {
+            const scorePercent = Math.round(Math.max(0, Math.min(1, fallbackMatch.comparison.similarity)) * 100);
             const nextBestScore = Math.max(bestSessionScoreRef.current || 0, scorePercent);
             bestSessionScoreRef.current = nextBestScore;
             setBestSessionScore(nextBestScore);
@@ -218,9 +222,9 @@ export default function PracticeMode({ letter, previousBestScore = 0, onNext, on
             smoothedScoreRef.current = smoothedScore;
             setScore(smoothedScore);
 
-            const worstJointIndex = bestMatch.comparison.landmarkErrors.reduce(
+            const worstJointIndex = fallbackMatch.comparison.landmarkErrors.reduce(
               (worstIndex, currentError, index) => (
-                currentError > bestMatch.comparison.landmarkErrors[worstIndex] ? index : worstIndex
+                currentError > fallbackMatch.comparison.landmarkErrors[worstIndex] ? index : worstIndex
               ),
               0
             );
@@ -231,7 +235,6 @@ export default function PracticeMode({ letter, previousBestScore = 0, onNext, on
               ? 'Great match. Hold that shape steady.'
               : getFeedbackForJoint(worstJointName);
             const now = performance.now();
-
             if (scorePercent >= MASTERY_SCORE || now - feedbackAtRef.current > FEEDBACK_HOLD_MS) {
               setPoseFeedback(nextFeedback);
               feedbackAtRef.current = now;
@@ -367,7 +370,7 @@ export default function PracticeMode({ letter, previousBestScore = 0, onNext, on
                 bestSessionScoreRef.current = null;
               }}
             >
-              {camOn ? 'Stop camera' : 'Start camera'}
+              {camOn ? 'Stop camera' : 'Start'}
             </button>
           </div>
         </div>
