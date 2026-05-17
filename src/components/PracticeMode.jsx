@@ -3,12 +3,14 @@ import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
 import { ensureMediapipeLoaded } from './gesture/mediapipe';
+import { ensureMediapipeLoaded } from '../utils/mediapipeLoader';
+import ModelViewer from './ModelViewer';
 
 const FEEDBACK_HOLD_MS = 700;
 const SCORE_SMOOTHING = 0.35;
 const MASTERY_SCORE = 99;
 
-export default function PracticeMode({ letter, onNext, onComplete }) {
+export default function PracticeMode({ letter, previousBestScore = 0, onNext, onComplete }) {
   const [camOn, setCamOn] = useState(false);
   const [score, setScore] = useState(null);
   const [bestSessionScore, setBestSessionScore] = useState(null);
@@ -320,10 +322,17 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
       <aside className="practice-sidebar">
         <div className="practice-letter-card card">
           <div className="practice-letter">{letter}</div>
+          <div className="practice-reference-model">
+            <ModelViewer letter={letter} />
+          </div>
         </div>
 
         <div className="feedback-card card">
           <div className="section-label">feedback</div>
+          <div className="previous-best-score">
+            <span>Previous best</span>
+            <strong>{previousBestScore > 0 ? `${previousBestScore}%` : 'No score yet'}</strong>
+          </div>
 
           {score !== null ? (
             <div className="feedback-stack">

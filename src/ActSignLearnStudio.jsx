@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import LearnMode from './components/LearnMode';
 import PracticeMode from './components/PracticeMode';
+import SignDuelMode from './components/SignDuelMode';
+import SpeedSignMode from './components/SpeedSignMode';
 import { LETTERS } from './data/aslData';
 
 function SignIndex({ letters, currentIdx, progress, onSelect }) {
@@ -48,6 +50,19 @@ function SignIndex({ letters, currentIdx, progress, onSelect }) {
   );
 }
 
+function UnsupportedDeckNotice({ deck }) {
+  return (
+    <section className="deck-unavailable-card card" aria-labelledby="deck-unavailable-title">
+      <p className="eyebrow">Unlocked Set</p>
+      <h2 id="deck-unavailable-title">{deck?.title || 'This deck'} is ready for later</h2>
+      <p className="hint-text">
+        You unlocked this set, but its sign images, camera references, and lesson steps are not in the app yet.
+        Your progress is safe; the deck will become playable as soon as that ASL dataset is added.
+      </p>
+    </section>
+  );
+}
+
 export default function ActSignLearnStudio({
   user,
   progress,
@@ -61,14 +76,26 @@ export default function ActSignLearnStudio({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [savingProgress, setSavingProgress] = useState(false);
   const learnedInSessionRef = useRef(new Set());
+  const isSpeedSign = activeDeck?.gameMode === 'speed-sign';
+  const isSignDuel = activeDeck?.gameMode === 'sign-duel';
+  const isGameMode = isSpeedSign || isSignDuel;
 
   const deckLetters = useMemo(() => {
-    const items = activeDeck?.items || LETTERS;
-    const letters = items.filter((item) => /^[A-Z]$/.test(item));
-    return letters.length ? letters : LETTERS;
+    if (!activeDeck) return LETTERS;
+    return (activeDeck.items || []).filter((item) => /^[A-Z]$/.test(item));
   }, [activeDeck]);
-  const currentLetter = deckLetters[currentIdx] || deckLetters[0];
-  const isSpeedSign = activeDeck?.gameMode === 'speed-sign';
+  const activeItems = activeDeck?.items || LETTERS;
+  const isUnsupportedDeck = Boolean(
+    activeDeck &&
+    !isGameMode &&
+    (
+      !['learn', 'practice'].includes(activeDeck.mode) ||
+      !deckLetters.length ||
+      deckLetters.length !== activeItems.length
+    )
+  );
+  const currentLetter = deckLetters[currentIdx] || deckLetters[0] || 'A';
+  const previousBestScore = Number(progress?.bestScores?.[currentLetter] || 0);
 
   useEffect(() => {
     setMode(initialMode);
@@ -80,6 +107,7 @@ export default function ActSignLearnStudio({
 
   useEffect(() => {
     if (mode !== 'learn') return;
+    if (isUnsupportedDeck) return;
     if (learnedInSessionRef.current.has(currentLetter)) return;
 
     learnedInSessionRef.current.add(currentLetter);
@@ -88,58 +116,112 @@ export default function ActSignLearnStudio({
         // Keep the lesson smooth even if a progress request fails.
       });
     }
-  }, [mode, currentLetter, onMarkLearned]);
+  }, [isUnsupportedDeck, mode, currentLetter, onMarkLearned]);
 
   const navigate = useCallback((delta) => {
+    if (!deckLetters.length) return;
     setCurrentIdx((index) => (index + delta + deckLetters.length) % deckLetters.length);
   }, [deckLetters.length]);
 
   useEffect(() => {
     const handler = (event) => {
+      if (isGameMode || isUnsupportedDeck) return;
       if (event.key === 'ArrowRight') navigate(1);
       if (event.key === 'ArrowLeft') navigate(-1);
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate]);
+  }, [isGameMode, isUnsupportedDeck, navigate]);
+
+  const handlePracticeComplete = async ({ letter, score }) => {
+    if (typeof onPracticeComplete !== 'function') return;
+    setSavingProgress(true);
+    try {
+      await onPracticeComplete({
+        letter,
+        score,
+        passed: score >= 99,
+      });
+    } finally {
+      setSavingProgress(false);
+    }
+  };
+
+  const handleSpeedSignRoundComplete = async ({ correctLetters }) => {
+    if (typeof onPracticeComplete !== 'function') return;
+
+    const entries = Object.entries(correctLetters || {});
+    if (!entries.length) return;
+
+    setSavingProgress(true);
+    try {
+      for (const [letter, score] of entries) {
+        await onPracticeComplete({
+          letter,
+          score,
+          passed: score >= 99,
+        });
+      }
+    } finally {
+      setSavingProgress(false);
+    }
+  };
 
   return (
-    <main className="screen-wrap">
+    <main className={`screen-wrap ${isSignDuel ? 'duel-screen-wrap' : ''}`}>
       <section className="studio-shell card-shell" aria-label="Learning studio">
         <header className="studio-header">
           <div>
-            <p className="eyebrow">{isSpeedSign ? 'SpeedSign' : activeDeck?.title || 'Learning Studio'}</p>
+            <p className="eyebrow">{isGameMode ? activeDeck?.title : activeDeck?.title || 'Learning Studio'}</p>
             <h1 className="page-title">Hi {user?.username}, let&apos;s sign underwater</h1>
           </div>
           <div className="studio-actions">
             <button type="button" className="ghost-btn" onClick={onBackToDashboard}>Back to Dashboard</button>
-            <div className="toggle-pill" role="tablist" aria-label="Learning mode">
-              <button
-                className={`toggle-btn ${mode === 'learn' ? 'active' : ''}`}
-                type="button"
-                role="tab"
-                aria-selected={mode === 'learn'}
-                onClick={() => setMode('learn')}
-                disabled={isSpeedSign}
-              >
-                Learn
-              </button>
-              <button
-                className={`toggle-btn ${mode === 'practice' ? 'active' : ''}`}
-                type="button"
-                role="tab"
-                aria-selected={mode === 'practice'}
-                onClick={() => setMode('practice')}
-              >
-                Practice
-              </button>
-            </div>
+            {isGameMode || isUnsupportedDeck ? (
+              <div className="game-rules-pill">
+                {isSignDuel ? 'First to 5 wins' : isSpeedSign ? '95% match counts' : 'Deck unlocked'}
+              </div>
+            ) : (
+              <div className="toggle-pill" role="tablist" aria-label="Learning mode">
+                <button
+                  className={`toggle-btn ${mode === 'learn' ? 'active' : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === 'learn'}
+                  onClick={() => setMode('learn')}
+                >
+                  Learn
+                </button>
+                <button
+                  className={`toggle-btn ${mode === 'practice' ? 'active' : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === 'practice'}
+                  onClick={() => setMode('practice')}
+                >
+                  Practice
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
         <div className="studio-body">
-          {mode === 'learn' ? (
+          {isUnsupportedDeck ? (
+            <UnsupportedDeckNotice deck={activeDeck} />
+          ) : isSpeedSign ? (
+            <SpeedSignMode
+              user={user}
+              letters={deckLetters}
+              onRoundComplete={handleSpeedSignRoundComplete}
+            />
+          ) : isSignDuel ? (
+            <SignDuelMode
+              letters={deckLetters}
+              onMatchComplete={handleSpeedSignRoundComplete}
+            />
+          ) : mode === 'learn' ? (
             <LearnMode
               letter={currentLetter}
               onPractice={() => setMode('practice')}
@@ -149,31 +231,22 @@ export default function ActSignLearnStudio({
           ) : (
             <PracticeMode
               letter={currentLetter}
+              previousBestScore={previousBestScore}
               onNext={() => navigate(1)}
-              onComplete={async ({ letter, score }) => {
-                if (typeof onPracticeComplete !== 'function') return;
-                setSavingProgress(true);
-                try {
-                  await onPracticeComplete({
-                    letter,
-                    score,
-                    passed: score >= 99,
-                  });
-                } finally {
-                  setSavingProgress(false);
-                }
-              }}
+              onComplete={handlePracticeComplete}
             />
           )}
         </div>
 
         {savingProgress ? <p className="saving-progress">Saving progress...</p> : null}
-        <SignIndex
-          letters={deckLetters}
-          currentIdx={currentIdx}
-          progress={progress}
-          onSelect={setCurrentIdx}
-        />
+        {!isGameMode && !isUnsupportedDeck ? (
+          <SignIndex
+            letters={deckLetters}
+            currentIdx={currentIdx}
+            progress={progress}
+            onSelect={setCurrentIdx}
+          />
+        ) : null}
       </section>
     </main>
   );
