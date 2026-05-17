@@ -5,14 +5,14 @@ import SignDuelMode from './components/SignDuelMode';
 import SpeedSignMode from './components/SpeedSignMode';
 import { LETTERS } from './data/aslData';
 
-function SignIndex({ letters, currentIdx, progress, onSelect }) {
+function SignIndex({ letters, currentIdx, progress, onSelect, compact = false }) {
   const learned = useMemo(() => new Set(progress?.learnedLetters || []), [progress]);
   const mastered = useMemo(() => new Set(progress?.masteredLetters || []), [progress]);
   const practiceCounts = progress?.practiceCounts || {};
   const bestScores = progress?.bestScores || {};
 
   return (
-    <section className="sign-index card" aria-labelledby="sign-index-title">
+    <section className={`sign-index card ${compact ? 'compact' : ''}`} aria-labelledby="sign-index-title">
       <div className="sign-index-header">
         <div>
           <p className="eyebrow">Alphabet Index</p>
@@ -69,6 +69,7 @@ export default function ActSignLearnStudio({
   activeDeck,
   initialMode = 'learn',
   onBackToDashboard,
+  onPlanTime,
   onMarkLearned,
   onPracticeComplete,
 }) {
@@ -76,9 +77,11 @@ export default function ActSignLearnStudio({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [savingProgress, setSavingProgress] = useState(false);
   const learnedInSessionRef = useRef(new Set());
+  const planTimerRef = useRef(null);
   const isSpeedSign = activeDeck?.gameMode === 'speed-sign';
   const isSignDuel = activeDeck?.gameMode === 'sign-duel';
   const isGameMode = isSpeedSign || isSignDuel;
+  const planSession = activeDeck?.planSession || null;
 
   const deckLetters = useMemo(() => {
     if (!activeDeck) return LETTERS;
@@ -96,6 +99,28 @@ export default function ActSignLearnStudio({
   );
   const currentLetter = deckLetters[currentIdx] || deckLetters[0] || 'A';
   const previousBestScore = Number(progress?.bestScores?.[currentLetter] || 0);
+  const isCompactPlanDeck = Boolean(planSession?.planId && deckLetters.length > 0 && deckLetters.length <= 6);
+
+  const flushPlanTime = useCallback((event = 'session') => {
+    const timer = planTimerRef.current;
+    if (!timer) return;
+
+    planTimerRef.current = null;
+    const seconds = Math.round((Date.now() - timer.startedAt) / 1000);
+    if (seconds < 1 || typeof onPlanTime !== 'function') return;
+
+    onPlanTime({
+      planId: timer.planId,
+      deckId: timer.deckId,
+      sourceDeckId: timer.sourceDeckId,
+      mode: timer.mode,
+      letter: timer.letter,
+      seconds,
+      event,
+    }).catch(() => {
+      // Time tracking should never interrupt the learning flow.
+    });
+  }, [onPlanTime]);
 
   useEffect(() => {
     setMode(initialMode);
@@ -104,6 +129,37 @@ export default function ActSignLearnStudio({
   useEffect(() => {
     setCurrentIdx(0);
   }, [activeDeck]);
+
+  useEffect(() => {
+    if (!planSession?.planId || isUnsupportedDeck) {
+      planTimerRef.current = null;
+      return undefined;
+    }
+
+    planTimerRef.current = {
+      planId: planSession.planId,
+      deckId: activeDeck?.id || planSession.sourceDeckId || 'recommended-plan',
+      sourceDeckId: planSession.sourceDeckId || activeDeck?.id || 'recommended-plan',
+      mode: isGameMode ? activeDeck?.gameMode || activeDeck?.mode || 'game' : mode,
+      letter: isGameMode ? '' : currentLetter,
+      startedAt: Date.now(),
+    };
+
+    return () => {
+      flushPlanTime('switch');
+    };
+  }, [
+    activeDeck?.gameMode,
+    activeDeck?.id,
+    activeDeck?.mode,
+    currentLetter,
+    flushPlanTime,
+    isGameMode,
+    isUnsupportedDeck,
+    mode,
+    planSession?.planId,
+    planSession?.sourceDeckId,
+  ]);
 
   useEffect(() => {
     if (mode !== 'learn') return;
@@ -168,6 +224,11 @@ export default function ActSignLearnStudio({
     }
   };
 
+  const handleBackClick = () => {
+    flushPlanTime('back');
+    onBackToDashboard();
+  };
+
   return (
     <main className={`screen-wrap ${isSignDuel ? 'duel-screen-wrap' : ''}`}>
       <section className="studio-shell card-shell" aria-label="Learning studio">
@@ -177,7 +238,7 @@ export default function ActSignLearnStudio({
             <h1 className="page-title">Hi {user?.username}, let&apos;s sign underwater</h1>
           </div>
           <div className="studio-actions">
-            <button type="button" className="ghost-btn" onClick={onBackToDashboard}>Back to Dashboard</button>
+            <button type="button" className="ghost-btn" onClick={handleBackClick}>Back to Dashboard</button>
             {isGameMode || isUnsupportedDeck ? (
               <div className="game-rules-pill">
                 {isSignDuel ? 'First to 5 wins' : isSpeedSign ? '95% match counts' : 'Deck unlocked'}
@@ -245,6 +306,7 @@ export default function ActSignLearnStudio({
             currentIdx={currentIdx}
             progress={progress}
             onSelect={setCurrentIdx}
+            compact={isCompactPlanDeck}
           />
         ) : null}
       </section>

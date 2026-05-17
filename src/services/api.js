@@ -77,6 +77,35 @@ export async function saveLearnerProfile(token, profile) {
   });
 }
 
+export async function getPersonalizedPlan(token) {
+  return request('/plan/current', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function generatePersonalizedPlan(token, reason = 'manual_refresh', options = {}) {
+  return request('/plan/generate', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ reason, ...options }),
+  });
+}
+
+export async function recordPlanTime(token, entry) {
+  return request('/plan/time', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(entry),
+  });
+}
+
 export async function markLearned(token, letter) {
   return request('/progress/learn', {
     method: 'POST',
