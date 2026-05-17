@@ -2,55 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { ASL_HINTS } from '../data/aslData';
 import referencePoses from '../data/referencePoses';
 import { HAND_LANDMARK_NAMES, compareLandmarkVectors } from '../utils/poseMath';
+import { ensureMediapipeLoaded } from './gesture/mediapipe';
 
-const MEDIAPIPE_SCRIPT_URLS = [
-  'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js',
-  'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js',
-];
 const FEEDBACK_HOLD_MS = 700;
 const SCORE_SMOOTHING = 0.35;
 const MASTERY_SCORE = 99;
-
-let mediaPipeReadyPromise = null;
-
-function loadExternalScript(src) {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[data-mediapipe-src="${src}"]`);
-    if (existing) {
-      if (existing.getAttribute('data-loaded') === 'true') {
-        resolve();
-        return;
-      }
-      existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    script.setAttribute('data-mediapipe-src', src);
-    script.addEventListener('load', () => {
-      script.setAttribute('data-loaded', 'true');
-      resolve();
-    });
-    script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)));
-    document.body.appendChild(script);
-  });
-}
-
-async function ensureMediapipeLoaded() {
-  if (!mediaPipeReadyPromise) {
-    mediaPipeReadyPromise = Promise.all(MEDIAPIPE_SCRIPT_URLS.map(loadExternalScript)).then(() => {
-      if (!window.Camera || !window.Hands || !window.HAND_CONNECTIONS || !window.drawConnectors) {
-        throw new Error('MediaPipe scripts loaded but required globals are missing.');
-      }
-    });
-  }
-  return mediaPipeReadyPromise;
-}
 
 export default function PracticeMode({ letter, onNext, onComplete }) {
   const [camOn, setCamOn] = useState(false);
@@ -193,14 +149,13 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
               centroid.y >= detectionFrame.yMin &&
               centroid.y <= detectionFrame.yMax;
 
-            if (!inFrame) return;
-
             const comparison = referenceVector ? compareLandmarkVectors(landmarks, referenceVector) : null;
             if (comparison) {
               inFrameComparisons.push({
                 handIndex,
                 landmarks,
                 comparison,
+                inFrame,
               });
             }
 
@@ -245,11 +200,15 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
           });
 
           const bestMatch = inFrameComparisons
+            .filter((item) => item.comparison && item.inFrame)
+            .sort((a, b) => b.comparison.similarity - a.comparison.similarity)[0];
+
+          const fallbackMatch = bestMatch || inFrameComparisons
             .filter((item) => item.comparison)
             .sort((a, b) => b.comparison.similarity - a.comparison.similarity)[0];
 
-          if (bestMatch) {
-            const scorePercent = Math.round(Math.max(0, Math.min(1, bestMatch.comparison.similarity)) * 100);
+          if (fallbackMatch) {
+            const scorePercent = Math.round(Math.max(0, Math.min(1, fallbackMatch.comparison.similarity)) * 100);
             const nextBestScore = Math.max(bestSessionScoreRef.current || 0, scorePercent);
             bestSessionScoreRef.current = nextBestScore;
             setBestSessionScore(nextBestScore);
@@ -261,9 +220,9 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
             smoothedScoreRef.current = smoothedScore;
             setScore(smoothedScore);
 
-            const worstJointIndex = bestMatch.comparison.landmarkErrors.reduce(
+            const worstJointIndex = fallbackMatch.comparison.landmarkErrors.reduce(
               (worstIndex, currentError, index) => (
-                currentError > bestMatch.comparison.landmarkErrors[worstIndex] ? index : worstIndex
+                currentError > fallbackMatch.comparison.landmarkErrors[worstIndex] ? index : worstIndex
               ),
               0
             );
@@ -274,7 +233,6 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
               ? 'Great match. Hold that shape steady.'
               : getFeedbackForJoint(worstJointName);
             const now = performance.now();
-
             if (scorePercent >= MASTERY_SCORE || now - feedbackAtRef.current > FEEDBACK_HOLD_MS) {
               setPoseFeedback(nextFeedback);
               feedbackAtRef.current = now;
@@ -403,7 +361,7 @@ export default function PracticeMode({ letter, onNext, onComplete }) {
                 bestSessionScoreRef.current = null;
               }}
             >
-              {camOn ? 'Stop camera' : 'Start camera'}
+              {camOn ? 'Stop camera' : 'Start'}
             </button>
           </div>
         </div>

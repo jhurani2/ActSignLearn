@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import LoginPage from './components/auth/LoginPage';
+import GestureController from './components/gesture/GestureController';
 import DashboardPage from './components/dashboard/DashboardPage';
 import UnderwaterBackground from './components/theme/UnderwaterBackground';
 import ActSignLearnStudio from './ActSignLearnStudio';
@@ -164,7 +165,11 @@ export default function App() {
   return (
     <div className="app-root">
       <UnderwaterBackground />
-      {view}
+      {authStatus === 'authenticated' && page === 'dashboard' ? (
+        <GestureController showCameraToggle activeView={page}>{view}</GestureController>
+      ) : (
+        view
+      )}
     </div>
   );
 }
