@@ -28,6 +28,8 @@ Built at a hackathon. Built for the 48 million Americans with some degree of hea
 
 React 18 · MediaPipe Hands · TensorFlow.js · Groq API · IconScout API · HTML5 Canvas · WebRTC · Node.js
 
+Our Kaggle Dataset Source: https://www.kaggle.com/datasets/jaisuryaprabu/sign-language-landmarks?utm_source=chatgpt.com
+
 <img width="500" height="296" alt="neural network_image" src="https://github.com/user-attachments/assets/a70581fd-96f4-4402-8fe5-c04a61f5f6a6" />
 
 ---
